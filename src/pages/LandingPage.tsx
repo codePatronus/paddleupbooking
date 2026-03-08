@@ -98,8 +98,8 @@ const LandingPage = () => {
             <div className="flex items-center gap-3 p-4 bg-card rounded-xl border hover:bg-secondary/50 transition-colors">
               <UserPlus className="h-5 w-5 text-accent" />
               <div>
-                <p className="font-semibold text-sm text-foreground">Find Players</p>
-                <p className="text-[10px] text-muted-foreground">Join a game</p>
+                <p className="font-semibold text-sm text-foreground">My Rooms</p>
+                <p className="text-[10px] text-muted-foreground">Booked chats</p>
               </div>
             </div>
           </Link>

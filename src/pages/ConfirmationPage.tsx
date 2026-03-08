@@ -102,8 +102,11 @@ const ConfirmationPage = () => {
         </div>
 
         <div className="space-y-3">
+          <Link to={`/chat/${booking.id}`}>
+            <Button className="w-full" size="lg">Open Chat Room 💬</Button>
+          </Link>
           <Link to="/book">
-            <Button className="w-full" size="lg">Book Another Slot</Button>
+            <Button variant="outline" className="w-full">Book Another Slot</Button>
           </Link>
           <Link to="/">
             <Button variant="ghost" className="w-full gap-2">
