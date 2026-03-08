@@ -122,9 +122,9 @@ const BookingPage = () => {
         booking_id: (data as Booking).id,
         host_id: user.id,
         players_needed: playersNeeded,
-        skill_filter: skillFilter === "any" ? null : skillFilter,
-        gender_pref: genderPref,
-        play_mode: playMode,
+        skill_filter: skillFilter === "any" ? null : skillFilter as "beginner" | "intermediate" | "advanced",
+        gender_pref: genderPref as "any" | "male" | "female",
+        play_mode: playMode as "casual" | "competitive",
       });
     }
 
