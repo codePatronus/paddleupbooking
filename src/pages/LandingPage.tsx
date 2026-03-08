@@ -1,8 +1,11 @@
 import { Link } from "react-router-dom";
-import { MapPin, Clock, Phone } from "lucide-react";
+import { MapPin, Clock, Phone, Users, Trophy, UserPlus, LogIn, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const LandingPage = () => {
+  const { user, profile, loading, signOut } = useAuth();
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -11,11 +14,35 @@ const LandingPage = () => {
           <h1 className="font-heading text-xl font-bold text-gradient-brand">
             🏓 Paddle Up Manipal
           </h1>
-          <Link to="/admin">
-            <Button variant="ghost" size="sm" className="text-muted-foreground text-xs">
-              Admin
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            {!loading && (
+              user ? (
+                <div className="flex items-center gap-1">
+                  {profile && (
+                    <Link to={`/player/${profile.username}`}>
+                      <Button variant="ghost" size="sm" className="text-xs gap-1">
+                        <User className="h-3.5 w-3.5" /> {profile.display_name}
+                      </Button>
+                    </Link>
+                  )}
+                  <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground">
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Link to="/login">
+                  <Button variant="ghost" size="sm" className="text-xs gap-1">
+                    <LogIn className="h-3.5 w-3.5" /> Login
+                  </Button>
+                </Link>
+              )
+            )}
+            <Link to="/admin">
+              <Button variant="ghost" size="sm" className="text-muted-foreground text-xs">
+                Admin
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -32,7 +59,7 @@ const LandingPage = () => {
           </h2>
 
           <p className="text-muted-foreground text-lg leading-relaxed">
-            Manipal's premium pickleball courts. 3 courts, open 8 AM – 10 PM daily. 
+            Manipal's premium pickleball courts. 3 courts, open 8 AM – 10 PM daily.
             Book your slot instantly!
           </p>
 
@@ -50,6 +77,49 @@ const LandingPage = () => {
             <Button size="lg" className="w-full sm:w-auto text-lg px-8 py-6 rounded-xl shadow-lg mt-2">
               Book a Court Now →
             </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Community section */}
+      <section className="container pb-6 max-w-md mx-auto px-4">
+        <h3 className="font-heading font-bold text-foreground text-center mb-3">Community</h3>
+        <div className="grid grid-cols-2 gap-2">
+          <Link to="/community">
+            <div className="flex items-center gap-3 p-4 bg-card rounded-xl border hover:bg-secondary/50 transition-colors">
+              <Users className="h-5 w-5 text-primary" />
+              <div>
+                <p className="font-semibold text-sm text-foreground">Players</p>
+                <p className="text-[10px] text-muted-foreground">Find & follow</p>
+              </div>
+            </div>
+          </Link>
+          <Link to="/find-players">
+            <div className="flex items-center gap-3 p-4 bg-card rounded-xl border hover:bg-secondary/50 transition-colors">
+              <UserPlus className="h-5 w-5 text-accent" />
+              <div>
+                <p className="font-semibold text-sm text-foreground">Find Players</p>
+                <p className="text-[10px] text-muted-foreground">Join a game</p>
+              </div>
+            </div>
+          </Link>
+          <Link to="/leaderboard">
+            <div className="flex items-center gap-3 p-4 bg-card rounded-xl border hover:bg-secondary/50 transition-colors">
+              <Trophy className="h-5 w-5 text-peak" />
+              <div>
+                <p className="font-semibold text-sm text-foreground">Leaderboard</p>
+                <p className="text-[10px] text-muted-foreground">Top ranked</p>
+              </div>
+            </div>
+          </Link>
+          <Link to="/tournaments">
+            <div className="flex items-center gap-3 p-4 bg-card rounded-xl border hover:bg-secondary/50 transition-colors">
+              <Trophy className="h-5 w-5 text-court-red" />
+              <div>
+                <p className="font-semibold text-sm text-foreground">Tournaments</p>
+                <p className="text-[10px] text-muted-foreground">Compete & win</p>
+              </div>
+            </div>
           </Link>
         </div>
       </section>
