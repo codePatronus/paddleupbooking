@@ -238,70 +238,80 @@ const BookingPage = () => {
                 <Input id="email" type="email" placeholder="your@email.com" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
               </div>
 
-              {/* Player matching toggle - only for logged in users */}
-              {user && profile && (
-                <div className="border rounded-xl p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-sm text-foreground">Need more players?</p>
-                      <p className="text-[10px] text-muted-foreground">Others can request to join your game</p>
-                    </div>
-                    <Switch checked={needPlayers} onCheckedChange={setNeedPlayers} />
+              {/* Player matching toggle */}
+              <div className="border rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-sm text-foreground">Need more players?</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {user ? "Others can request to join your game" : "Log in to enable player matching"}
+                    </p>
                   </div>
+                  <Switch 
+                    checked={needPlayers} 
+                    onCheckedChange={(checked) => {
+                      if (!user) {
+                        toast.error("Please log in to use player matching");
+                        return;
+                      }
+                      setNeedPlayers(checked);
+                    }}
+                    disabled={!user}
+                  />
+                </div>
 
-                  {needPlayers && (
-                    <div className="space-y-3 pt-2 border-t animate-fade-in">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Players needed</Label>
-                          <Select value={String(playersNeeded)} onValueChange={(v) => setPlayersNeeded(Number(v) as 1 | 2)}>
-                            <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="1">Need 1 player</SelectItem>
-                              <SelectItem value="2">Need 2 players</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Play mode</Label>
-                          <Select value={playMode} onValueChange={setPlayMode}>
-                            <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="casual">😎 Casual</SelectItem>
-                              <SelectItem value="competitive">🔥 Competitive</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                {needPlayers && user && (
+                  <div className="space-y-3 pt-2 border-t animate-fade-in">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Players needed</Label>
+                        <Select value={String(playersNeeded)} onValueChange={(v) => setPlayersNeeded(Number(v) as 1 | 2)}>
+                          <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">Need 1 player</SelectItem>
+                            <SelectItem value="2">Need 2 players</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Skill level</Label>
-                          <Select value={skillFilter} onValueChange={setSkillFilter}>
-                            <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="any">Any skill</SelectItem>
-                              <SelectItem value="beginner">Beginner</SelectItem>
-                              <SelectItem value="intermediate">Intermediate</SelectItem>
-                              <SelectItem value="advanced">Advanced</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Gender pref</Label>
-                          <Select value={genderPref} onValueChange={setGenderPref}>
-                            <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="any">Any</SelectItem>
-                              <SelectItem value="male">Male</SelectItem>
-                              <SelectItem value="female">Female</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Play mode</Label>
+                        <Select value={playMode} onValueChange={setPlayMode}>
+                          <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="casual">😎 Casual</SelectItem>
+                            <SelectItem value="competitive">🔥 Competitive</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
-                  )}
-                </div>
-              )}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Skill level</Label>
+                        <Select value={skillFilter} onValueChange={setSkillFilter}>
+                          <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="any">Any skill</SelectItem>
+                            <SelectItem value="beginner">Beginner</SelectItem>
+                            <SelectItem value="intermediate">Intermediate</SelectItem>
+                            <SelectItem value="advanced">Advanced</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Gender pref</Label>
+                        <Select value={genderPref} onValueChange={setGenderPref}>
+                          <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="any">Any</SelectItem>
+                            <SelectItem value="male">Male</SelectItem>
+                            <SelectItem value="female">Female</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <div className="flex gap-3">
                 <Button type="button" variant="outline" onClick={() => { setStep("select"); setSelectedSlot(null); }} className="flex-1">Back</Button>
