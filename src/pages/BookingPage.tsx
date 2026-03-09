@@ -42,12 +42,20 @@ const BookingPage = () => {
   }, [profile, user]);
 
   useEffect(() => {
-    fetchBookings();
+    let mounted = true;
+    fetchBookings().then(() => {
+      if (!mounted) return;
+    });
     const channel = supabase
       .channel("bookings-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "bookings" }, () => fetchBookings())
+      .on("postgres_changes", { event: "*", schema: "public", table: "bookings" }, () => {
+        if (mounted) fetchBookings();
+      })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { 
+      mounted = false;
+      supabase.removeChannel(channel); 
+    };
   }, [dateStr]);
 
   async function fetchBookings() {
