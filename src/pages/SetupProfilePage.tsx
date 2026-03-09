@@ -34,28 +34,35 @@ const SetupProfilePage = () => {
     }
 
     setLoading(true);
-    const { error } = await supabase.from("profiles").insert({
-      id: user.id,
-      username,
-      display_name: form.display_name.trim(),
-      skill_level: form.skill_level,
-      gender: form.gender,
-    });
-    setLoading(false);
+    try {
+      const { error } = await supabase.from("profiles").upsert({
+        id: user.id,
+        username,
+        display_name: form.display_name.trim(),
+        skill_level: form.skill_level,
+        gender: form.gender,
+      }, { onConflict: "id" });
 
-    if (error) {
-      if (error.code === "23505") {
-        toast.error("Username already taken!");
-      } else {
-        toast.error("Failed to create profile");
-        console.error(error);
+      if (error) {
+        if (error.code === "23505") {
+          toast.error("Username already taken!");
+        } else {
+          toast.error("Failed to create profile: " + error.message);
+          console.error("Profile creation error:", error);
+        }
+        setLoading(false);
+        return;
       }
-      return;
-    }
 
-    await refreshProfile();
-    toast.success("Welcome to Paddle Up! 🏓");
-    navigate("/");
+      await refreshProfile();
+      toast.success("Welcome to Paddle Up! 🏓");
+      navigate("/");
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
