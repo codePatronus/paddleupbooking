@@ -54,6 +54,20 @@ const AdminPage = () => {
     return bookings.find(b => b.court_number === court && b.slot_hour === hour && b.payment_status !== "cancelled");
   }
 
+  async function handleApprove(bookingId: string) {
+    const { error } = await supabase.from("bookings").update({ payment_status: "completed" }).eq("id", bookingId);
+    if (error) { toast.error("Failed to approve"); return; }
+    toast.success("Booking approved! ✅");
+    fetchBookings();
+  }
+
+  async function handleDecline(bookingId: string) {
+    const { error } = await supabase.from("bookings").update({ payment_status: "cancelled" }).eq("id", bookingId);
+    if (error) { toast.error("Failed to decline"); return; }
+    toast.success("Booking declined");
+    fetchBookings();
+  }
+
   const filteredBookings = bookings.filter(b => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
