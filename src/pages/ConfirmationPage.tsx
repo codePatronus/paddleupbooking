@@ -57,8 +57,19 @@ const ConfirmationPage = () => {
         </div>
 
         <div className="space-y-1">
-          <h1 className="font-heading text-2xl font-bold text-foreground">Booking Confirmed!</h1>
-          <p className="text-sm text-muted-foreground">Your court is reserved. See you there! 🏓</p>
+          <h1 className="font-heading text-2xl font-bold text-foreground">
+            {booking.payment_status === "completed" ? "Booking Confirmed!" : "Booking Submitted!"}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {booking.payment_status === "completed" 
+              ? "Your court is reserved. See you there! 🏓" 
+              : "Awaiting admin approval. You'll be confirmed once payment is verified. ⏳"}
+          </p>
+          {booking.payment_status === "pending" && (
+            <div className="mt-2 inline-flex items-center gap-1.5 bg-peak/10 text-peak rounded-full px-3 py-1 text-xs font-semibold">
+              ⏳ Pending Approval
+            </div>
+          )}
         </div>
 
         {/* Booking card */}

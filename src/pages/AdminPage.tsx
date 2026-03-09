@@ -210,6 +210,16 @@ const AdminPage = () => {
                     <span className="font-semibold text-foreground">₹{b.amount}</span>
                   </div>
                   <p className="text-[10px] text-muted-foreground font-mono">{b.booking_id}</p>
+                  {b.payment_status === "pending" && (
+                    <div className="flex gap-2 pt-1">
+                      <Button size="sm" className="flex-1 text-xs" onClick={() => handleApprove(b.id)}>
+                        ✅ Approve
+                      </Button>
+                      <Button size="sm" variant="destructive" className="flex-1 text-xs" onClick={() => handleDecline(b.id)}>
+                        ❌ Decline
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))
             )}
