@@ -101,6 +101,9 @@ const BookingPage = () => {
     setLoading(true);
     const amount = getSlotPrice(selectedSlot.hour);
 
+    // Only link user_id if the user has a profile (FK constraint requires profiles row)
+    const safeUserId = profile ? user?.id : null;
+
     try {
       const { data, error } = await supabase
         .from("bookings")
@@ -113,37 +116,69 @@ const BookingPage = () => {
           customer_email: formData.email.trim() || null,
           amount,
           payment_status: "pending",
-          user_id: user?.id || null,
+          user_id: safeUserId || null,
         })
         .select()
         .single();
 
       if (error) {
+        console.error("Booking insert error:", error);
         if (error.code === "23505") {
           toast.error("This slot was just booked by someone else!");
           fetchBookings();
           setStep("select");
           setSelectedSlot(null);
+        } else if (error.code === "23503") {
+          // FK violation — retry without user_id
+          const { data: retryData, error: retryError } = await supabase
+            .from("bookings")
+            .insert({
+              court_number: selectedSlot.court,
+              booking_date: dateStr,
+              slot_hour: selectedSlot.hour,
+              customer_name: formData.name.trim(),
+              customer_phone: formData.phone.trim(),
+              customer_email: formData.email.trim() || null,
+              amount,
+              payment_status: "pending",
+              user_id: null,
+            })
+            .select()
+            .single();
+
+          if (retryError) {
+            console.error("Retry booking error:", retryError);
+            toast.error("Booking failed. Please try again.");
+          } else if (retryData) {
+            toast.success("Booking submitted for approval!");
+            navigate(`/booking/${(retryData as Booking).id}`);
+          }
         } else {
-          toast.error("Booking failed. Please try again.");
+          toast.error("Booking failed: " + error.message);
         }
         return;
       }
 
       // Create match request if toggled on
-      if (needPlayers && user && data) {
-        await supabase.from("match_requests").insert({
-          booking_id: (data as Booking).id,
-          host_id: user.id,
-          players_needed: playersNeeded,
-          skill_filter: skillFilter === "any" ? null : skillFilter as "beginner" | "intermediate" | "advanced",
-          gender_pref: genderPref as "any" | "male" | "female",
-          play_mode: playMode as "casual" | "competitive",
-        });
+      if (needPlayers && user && profile && data) {
+        try {
+          await supabase.from("match_requests").insert({
+            booking_id: (data as Booking).id,
+            host_id: user.id,
+            players_needed: playersNeeded,
+            skill_filter: skillFilter === "any" ? null : skillFilter as "beginner" | "intermediate" | "advanced",
+            gender_pref: genderPref as "any" | "male" | "female",
+            play_mode: playMode as "casual" | "competitive",
+          });
+        } catch (matchErr) {
+          console.error("Match request error (non-blocking):", matchErr);
+        }
       }
 
+      toast.success("Booking submitted for approval!");
       navigate(`/booking/${(data as Booking).id}`);
-    } catch {
+    } catch (err) {
+      console.error("Unexpected booking error:", err);
       toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
