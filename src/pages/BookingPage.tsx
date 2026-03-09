@@ -96,54 +96,58 @@ const BookingPage = () => {
     setStep("pay");
   }
 
-  async function handlePaymentDone() {
+  async function handleSubmitBooking() {
     if (!selectedSlot) return;
     setLoading(true);
     const amount = getSlotPrice(selectedSlot.hour);
 
-    const { data, error } = await supabase
-      .from("bookings")
-      .insert({
-        court_number: selectedSlot.court,
-        booking_date: dateStr,
-        slot_hour: selectedSlot.hour,
-        customer_name: formData.name.trim(),
-        customer_phone: formData.phone.trim(),
-        customer_email: formData.email.trim() || null,
-        amount,
-        payment_status: "completed",
-        user_id: user?.id || null,
-      })
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("bookings")
+        .insert({
+          court_number: selectedSlot.court,
+          booking_date: dateStr,
+          slot_hour: selectedSlot.hour,
+          customer_name: formData.name.trim(),
+          customer_phone: formData.phone.trim(),
+          customer_email: formData.email.trim() || null,
+          amount,
+          payment_status: "pending",
+          user_id: user?.id || null,
+        })
+        .select()
+        .single();
 
-    if (error) {
-      setLoading(false);
-      if (error.code === "23505") {
-        toast.error("This slot was just booked by someone else!");
-        fetchBookings();
-        setStep("select");
-        setSelectedSlot(null);
-      } else {
-        toast.error("Booking failed. Please try again.");
+      if (error) {
+        if (error.code === "23505") {
+          toast.error("This slot was just booked by someone else!");
+          fetchBookings();
+          setStep("select");
+          setSelectedSlot(null);
+        } else {
+          toast.error("Booking failed. Please try again.");
+        }
+        return;
       }
-      return;
-    }
 
-    // Create match request if toggled on
-    if (needPlayers && user && data) {
-      await supabase.from("match_requests").insert({
-        booking_id: (data as Booking).id,
-        host_id: user.id,
-        players_needed: playersNeeded,
-        skill_filter: skillFilter === "any" ? null : skillFilter as "beginner" | "intermediate" | "advanced",
-        gender_pref: genderPref as "any" | "male" | "female",
-        play_mode: playMode as "casual" | "competitive",
-      });
-    }
+      // Create match request if toggled on
+      if (needPlayers && user && data) {
+        await supabase.from("match_requests").insert({
+          booking_id: (data as Booking).id,
+          host_id: user.id,
+          players_needed: playersNeeded,
+          skill_filter: skillFilter === "any" ? null : skillFilter as "beginner" | "intermediate" | "advanced",
+          gender_pref: genderPref as "any" | "male" | "female",
+          play_mode: playMode as "casual" | "competitive",
+        });
+      }
 
-    setLoading(false);
-    navigate(`/booking/${(data as Booking).id}`);
+      navigate(`/booking/${(data as Booking).id}`);
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const price = selectedSlot ? getSlotPrice(selectedSlot.hour) : 0;
@@ -356,10 +360,11 @@ const BookingPage = () => {
             </p>
 
             <div className="border-t pt-4 space-y-3">
-              <p className="text-sm text-muted-foreground">After payment, tap below to confirm your booking:</p>
-              <Button onClick={handlePaymentDone} disabled={loading} className="w-full py-5 text-base" size="lg">
-                {loading ? "Confirming..." : "✅ I've Paid — Confirm Booking"}
+              <p className="text-sm text-muted-foreground">After payment, submit your booking for admin approval:</p>
+              <Button onClick={handleSubmitBooking} disabled={loading} className="w-full py-5 text-base" size="lg">
+                {loading ? "Submitting..." : "📩 Submit Booking for Approval"}
               </Button>
+              <p className="text-[10px] text-muted-foreground">Your booking will be confirmed once the admin verifies payment.</p>
             </div>
 
             <Button variant="ghost" size="sm" onClick={() => setStep("details")} className="text-muted-foreground">← Go Back</Button>
