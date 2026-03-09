@@ -59,12 +59,18 @@ const BookingPage = () => {
   }, [dateStr]);
 
   async function fetchBookings() {
-    const { data } = await supabase
-      .from("bookings")
-      .select("*")
-      .eq("booking_date", dateStr)
-      .neq("payment_status", "cancelled");
-    setBookings((data as Booking[]) || []);
+    try {
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("booking_date", dateStr)
+        .neq("payment_status", "cancelled");
+      
+      if (error) throw error;
+      setBookings((data as Booking[]) || []);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+    }
   }
 
   function isSlotBooked(court: number, hour: number) {
