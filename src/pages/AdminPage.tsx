@@ -229,8 +229,8 @@ const AdminPage = () => {
                       <Button size="sm" className="flex-1 text-xs" onClick={() => handleApprove(b.id)}>
                         ✅ Approve
                       </Button>
-                      <Button size="sm" variant="destructive" className="flex-1 text-xs" onClick={() => handleDecline(b.id)}>
-                        ❌ Decline
+                      <Button size="sm" variant="destructive" className="flex-1 text-xs" onClick={() => handleCancel(b.id)}>
+                        ❌ Cancel
                       </Button>
                     </div>
                   )}
