@@ -14,6 +14,8 @@ const SetupProfilePage = () => {
   const [form, setForm] = useState({
     username: "",
     display_name: "",
+    phone: "",
+    password: "",
     skill_level: "beginner" as "beginner" | "intermediate" | "advanced",
     gender: "prefer_not_to_say",
   });
@@ -32,20 +34,40 @@ const SetupProfilePage = () => {
       toast.error("Please enter a display name");
       return;
     }
+    if (form.phone && !/^[6-9]\d{9}$/.test(form.phone.trim())) {
+      toast.error("Please enter a valid 10-digit Indian phone number");
+      return;
+    }
 
     setLoading(true);
     try {
+      // Set password if provided (for Google OAuth users who want username/phone login later)
+      if (form.password.trim().length >= 6) {
+        const { error: pwError } = await supabase.auth.updateUser({
+          password: form.password.trim(),
+        });
+        if (pwError) {
+          console.error("Password set error:", pwError);
+          // Non-blocking — continue with profile creation
+        }
+      }
+
       const { error } = await supabase.from("profiles").upsert({
         id: user.id,
         username,
         display_name: form.display_name.trim(),
+        phone: form.phone.trim() || null,
         skill_level: form.skill_level,
         gender: form.gender,
       }, { onConflict: "id" });
 
       if (error) {
         if (error.code === "23505") {
-          toast.error("Username already taken!");
+          if (error.message.includes("phone")) {
+            toast.error("This phone number is already linked to another account!");
+          } else {
+            toast.error("Username already taken!");
+          }
         } else {
           toast.error("Failed to create profile: " + error.message);
           console.error("Profile creation error:", error);
@@ -76,25 +98,29 @@ const SetupProfilePage = () => {
         <form onSubmit={handleSubmit} className="bg-card border rounded-2xl p-5 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="username">Username *</Label>
-            <Input
-              id="username"
-              placeholder="e.g. smashking42"
-              value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
-              required
-            />
+            <Input id="username" placeholder="e.g. smashking42" value={form.username}
+              onChange={(e) => setForm({ ...form, username: e.target.value })} required />
             <p className="text-[11px] text-muted-foreground">3-20 chars, letters, numbers & underscores</p>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="display_name">Display Name *</Label>
-            <Input
-              id="display_name"
-              placeholder="Your name"
-              value={form.display_name}
-              onChange={(e) => setForm({ ...form, display_name: e.target.value })}
-              required
-            />
+            <Input id="display_name" placeholder="Your name" value={form.display_name}
+              onChange={(e) => setForm({ ...form, display_name: e.target.value })} required />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone Number</Label>
+            <Input id="phone" type="tel" placeholder="10-digit phone number" value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <p className="text-[11px] text-muted-foreground">Used for phone+password login</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Set Password (optional)</Label>
+            <Input id="password" type="password" placeholder="Min 6 characters" value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })} />
+            <p className="text-[11px] text-muted-foreground">Lets you log in with username or phone + password</p>
           </div>
 
           <div className="space-y-2">

@@ -344,6 +344,7 @@ export type Database = {
           id: string
           losses: number
           matches_played: number
+          phone: string | null
           skill_level: Database["public"]["Enums"]["skill_level"]
           updated_at: string
           username: string
@@ -359,6 +360,7 @@ export type Database = {
           id: string
           losses?: number
           matches_played?: number
+          phone?: string | null
           skill_level?: Database["public"]["Enums"]["skill_level"]
           updated_at?: string
           username: string
@@ -374,6 +376,7 @@ export type Database = {
           id?: string
           losses?: number
           matches_played?: number
+          phone?: string | null
           skill_level?: Database["public"]["Enums"]["skill_level"]
           updated_at?: string
           username?: string
@@ -544,7 +547,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_email_by_phone: { Args: { p_phone: string }; Returns: string }
+      get_email_by_username: { Args: { p_username: string }; Returns: string }
     }
     Enums: {
       gender_pref: "any" | "male" | "female"

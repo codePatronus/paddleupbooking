@@ -61,10 +61,10 @@ const AdminPage = () => {
     fetchBookings();
   }
 
-  async function handleDecline(bookingId: string) {
+  async function handleCancel(bookingId: string) {
     const { error } = await supabase.from("bookings").update({ payment_status: "cancelled" }).eq("id", bookingId);
-    if (error) { toast.error("Failed to decline"); return; }
-    toast.success("Booking declined");
+    if (error) { toast.error("Failed to cancel"); return; }
+    toast.success("Booking cancelled");
     fetchBookings();
   }
 
@@ -229,8 +229,15 @@ const AdminPage = () => {
                       <Button size="sm" className="flex-1 text-xs" onClick={() => handleApprove(b.id)}>
                         ✅ Approve
                       </Button>
-                      <Button size="sm" variant="destructive" className="flex-1 text-xs" onClick={() => handleDecline(b.id)}>
-                        ❌ Decline
+                      <Button size="sm" variant="destructive" className="flex-1 text-xs" onClick={() => handleCancel(b.id)}>
+                        ❌ Cancel
+                      </Button>
+                    </div>
+                  )}
+                  {b.payment_status === "completed" && (
+                    <div className="pt-1">
+                      <Button size="sm" variant="destructive" className="w-full text-xs" onClick={() => handleCancel(b.id)}>
+                        ❌ Cancel Booking
                       </Button>
                     </div>
                   )}
