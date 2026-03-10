@@ -61,10 +61,10 @@ const AdminPage = () => {
     fetchBookings();
   }
 
-  async function handleDecline(bookingId: string) {
+  async function handleCancel(bookingId: string) {
     const { error } = await supabase.from("bookings").update({ payment_status: "cancelled" }).eq("id", bookingId);
-    if (error) { toast.error("Failed to decline"); return; }
-    toast.success("Booking declined");
+    if (error) { toast.error("Failed to cancel"); return; }
+    toast.success("Booking cancelled");
     fetchBookings();
   }
 

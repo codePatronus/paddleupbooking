@@ -14,6 +14,7 @@ import ProfilePage from "./pages/ProfilePage";
 import CommunityPage from "./pages/CommunityPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import FindPlayersPage from "./pages/FindPlayersPage";
+import MyBookingsPage from "./pages/MyBookingsPage";
 import TournamentsPage from "./pages/TournamentsPage";
 import ChatRoomPage from "./pages/ChatRoomPage";
 import NotFound from "./pages/NotFound";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/community" element={<CommunityPage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/find-players" element={<FindPlayersPage />} />
+            <Route path="/my-bookings" element={<MyBookingsPage />} />
             <Route path="/tournaments" element={<TournamentsPage />} />
             <Route path="/chat/:roomId" element={<ChatRoomPage />} />
             <Route path="*" element={<NotFound />} />

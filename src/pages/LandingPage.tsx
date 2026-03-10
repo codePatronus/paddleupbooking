@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MapPin, Clock, Phone, Users, Trophy, UserPlus, LogIn, LogOut, User } from "lucide-react";
+import { MapPin, Clock, Phone, Users, Trophy, MessageCircle, LogIn, LogOut, User, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -85,24 +85,35 @@ const LandingPage = () => {
       <section className="container pb-6 max-w-md mx-auto px-4">
         <h3 className="font-heading font-bold text-foreground text-center mb-3">Community</h3>
         <div className="grid grid-cols-2 gap-2">
+          <Link to="/find-players">
+            <div className="flex items-center gap-3 p-4 bg-card rounded-xl border hover:bg-secondary/50 transition-colors">
+              <MessageCircle className="h-5 w-5 text-primary" />
+              <div>
+                <p className="font-semibold text-sm text-foreground">Rooms</p>
+                <p className="text-[10px] text-muted-foreground">Join open games</p>
+              </div>
+            </div>
+          </Link>
           <Link to="/community">
             <div className="flex items-center gap-3 p-4 bg-card rounded-xl border hover:bg-secondary/50 transition-colors">
-              <Users className="h-5 w-5 text-primary" />
+              <Users className="h-5 w-5 text-accent" />
               <div>
                 <p className="font-semibold text-sm text-foreground">Players</p>
                 <p className="text-[10px] text-muted-foreground">Find & follow</p>
               </div>
             </div>
           </Link>
-          <Link to="/find-players">
-            <div className="flex items-center gap-3 p-4 bg-card rounded-xl border hover:bg-secondary/50 transition-colors">
-              <UserPlus className="h-5 w-5 text-accent" />
-              <div>
-                <p className="font-semibold text-sm text-foreground">My Rooms</p>
-                <p className="text-[10px] text-muted-foreground">Booked chats</p>
+          {user && (
+            <Link to="/my-bookings">
+              <div className="flex items-center gap-3 p-4 bg-card rounded-xl border hover:bg-secondary/50 transition-colors">
+                <Calendar className="h-5 w-5 text-offpeak" />
+                <div>
+                  <p className="font-semibold text-sm text-foreground">My Bookings</p>
+                  <p className="text-[10px] text-muted-foreground">Track status</p>
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          )}
           <Link to="/leaderboard">
             <div className="flex items-center gap-3 p-4 bg-card rounded-xl border hover:bg-secondary/50 transition-colors">
               <Trophy className="h-5 w-5 text-peak" />
@@ -114,7 +125,7 @@ const LandingPage = () => {
           </Link>
           <Link to="/tournaments">
             <div className="flex items-center gap-3 p-4 bg-card rounded-xl border hover:bg-secondary/50 transition-colors">
-              <Trophy className="h-5 w-5 text-court-red" />
+              <Trophy className="h-5 w-5 text-destructive" />
               <div>
                 <p className="font-semibold text-sm text-foreground">Tournaments</p>
                 <p className="text-[10px] text-muted-foreground">Compete & win</p>
@@ -128,7 +139,7 @@ const LandingPage = () => {
       <section className="container pb-12 space-y-3 max-w-md mx-auto px-4">
         <InfoCard icon={<MapPin className="h-5 w-5 text-primary" />} title="Location" description="Manipal, Karnataka" />
         <InfoCard icon={<Clock className="h-5 w-5 text-accent" />} title="Hours" description="8:00 AM – 10:00 PM, Every Day" />
-        <InfoCard icon={<Phone className="h-5 w-5 text-court-red" />} title="Contact" description="DM us on Instagram @paddleupmanipal" />
+        <InfoCard icon={<Phone className="h-5 w-5 text-destructive" />} title="Contact" description="DM us on Instagram @paddleupmanipal" />
       </section>
 
       {/* Footer */}
