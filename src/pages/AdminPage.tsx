@@ -234,6 +234,13 @@ const AdminPage = () => {
                       </Button>
                     </div>
                   )}
+                  {b.payment_status === "completed" && (
+                    <div className="pt-1">
+                      <Button size="sm" variant="destructive" className="w-full text-xs" onClick={() => handleCancel(b.id)}>
+                        ❌ Cancel Booking
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))
             )}
