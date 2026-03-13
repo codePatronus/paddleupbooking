@@ -34,8 +34,8 @@ const SetupProfilePage = () => {
       toast.error("Please enter a display name");
       return;
     }
-    if (form.phone && !/^[6-9]\d{9}$/.test(form.phone.trim())) {
-      toast.error("Please enter a valid 10-digit Indian phone number");
+    if (!form.phone.trim() || !/^[6-9]\d{9}$/.test(form.phone.trim())) {
+      toast.error("A valid 10-digit phone number is required");
       return;
     }
 
