@@ -34,8 +34,8 @@ const SetupProfilePage = () => {
       toast.error("Please enter a display name");
       return;
     }
-    if (form.phone && !/^[6-9]\d{9}$/.test(form.phone.trim())) {
-      toast.error("Please enter a valid 10-digit Indian phone number");
+    if (!form.phone.trim() || !/^[6-9]\d{9}$/.test(form.phone.trim())) {
+      toast.error("A valid 10-digit phone number is required");
       return;
     }
 
@@ -110,10 +110,10 @@ const SetupProfilePage = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
+            <Label htmlFor="phone">Phone Number *</Label>
             <Input id="phone" type="tel" placeholder="10-digit phone number" value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-            <p className="text-[11px] text-muted-foreground">Used for phone+password login</p>
+              onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
+            <p className="text-[11px] text-muted-foreground">Required for login & contact</p>
           </div>
 
           <div className="space-y-2">
