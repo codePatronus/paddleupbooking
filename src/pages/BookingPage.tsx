@@ -236,7 +236,12 @@ const BookingPage = () => {
                 <div key={c} className="py-1.5 rounded-lg bg-accent/10 text-accent">Court {c}</div>
               ))}
             </div>
-            {SLOT_HOURS.map((hour) => (
+            {SLOT_HOURS.filter((hour) => {
+              // Hide slots that have already passed today
+              const now = new Date();
+              const isToday = format(now, "yyyy-MM-dd") === dateStr;
+              return !isToday || hour > now.getHours();
+            }).map((hour) => (
               <div key={hour} className="grid grid-cols-[70px_1fr_1fr_1fr] gap-1.5">
                 <div className="flex items-center text-xs font-medium text-muted-foreground">{formatHour(hour)}</div>
                 {COURTS.map((court) => {
