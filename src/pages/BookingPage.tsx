@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { format, addDays } from "date-fns";
+import { QRCodeSVG } from "qrcode.react";
 import { supabase, COURTS, SLOT_HOURS, getSlotPrice, formatHour, isPeakHour, type Booking } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -390,14 +391,15 @@ const BookingPage = () => {
               </p>
             </div>
 
-            <a href={upiLink}
-              className="inline-flex items-center justify-center w-full rounded-xl bg-primary text-primary-foreground py-4 px-6 text-lg font-bold shadow-lg active:scale-95 transition-transform">
-              Pay via UPI App 💳
-            </a>
-
-            <p className="text-xs text-muted-foreground">
-              UPI ID: <span className="font-mono font-semibold text-foreground">{upiId}</span>
-            </p>
+            <div className="flex flex-col items-center gap-3 py-2">
+              <div className="bg-white p-4 rounded-xl border-2 border-primary/20 shadow-sm">
+                <QRCodeSVG value={upiId} size={200} level="H" includeMargin={false} />
+              </div>
+              <p className="text-xs text-muted-foreground">Scan with any UPI app to pay</p>
+              <p className="text-xs text-muted-foreground">
+                UPI ID: <span className="font-mono font-semibold text-foreground select-all">{upiId}</span>
+              </p>
+            </div>
 
             <div className="border-t pt-4 space-y-3">
               <p className="text-sm text-muted-foreground">After payment, submit your booking for admin approval:</p>
