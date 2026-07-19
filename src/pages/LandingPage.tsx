@@ -137,9 +137,13 @@ const LandingPage = () => {
 
       {/* Info cards */}
       <section className="container pb-12 space-y-3 max-w-md mx-auto px-4">
-        <InfoCard icon={<MapPin className="h-5 w-5 text-primary" />} title="Location" description="Manipal, Karnataka" />
+        <a href="https://maps.app.goo.gl/5qHaVkp92qcTHf3g8" target="_blank" rel="noopener noreferrer" className="block">
+          <InfoCard icon={<MapPin className="h-5 w-5 text-primary" />} title="Location" description="Manipal, Karnataka — Tap for Google Maps" />
+        </a>
         <InfoCard icon={<Clock className="h-5 w-5 text-accent" />} title="Hours" description="8:00 AM – 10:00 PM, Every Day" />
-        <InfoCard icon={<Phone className="h-5 w-5 text-destructive" />} title="Contact" description="DM us on Instagram @paddleupmanipal" />
+        <a href="https://www.instagram.com/paddleup.manipal" target="_blank" rel="noopener noreferrer" className="block">
+          <InfoCard icon={<Phone className="h-5 w-5 text-destructive" />} title="Contact" description="DM us on Instagram @paddleup.manipal" />
+        </a>
       </section>
 
       {/* Footer */}
