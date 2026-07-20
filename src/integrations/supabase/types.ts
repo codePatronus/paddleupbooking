@@ -224,13 +224,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "match_requests_booking_id_fkey"
-            columns: ["booking_id"]
-            isOneToOne: false
-            referencedRelation: "bookings_availability"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "match_requests_host_id_fkey"
             columns: ["host_id"]
             isOneToOne: false
@@ -578,34 +571,18 @@ export type Database = {
       }
     }
     Views: {
-      bookings_availability: {
-        Row: {
-          booking_date: string | null
-          court_number: number | null
-          id: string | null
-          payment_status: string | null
-          slot_hour: number | null
-        }
-        Insert: {
-          booking_date?: string | null
-          court_number?: number | null
-          id?: string | null
-          payment_status?: string | null
-          slot_hour?: number | null
-        }
-        Update: {
-          booking_date?: string | null
-          court_number?: number | null
-          id?: string | null
-          payment_status?: string | null
-          slot_hour?: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       get_email_by_phone: { Args: { p_phone: string }; Returns: string }
       get_email_by_username: { Args: { p_username: string }; Returns: string }
+      get_slot_availability: {
+        Args: { p_date: string }
+        Returns: {
+          court_number: number
+          slot_hour: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
