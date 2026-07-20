@@ -30,8 +30,8 @@ const CommunityPage = () => {
   }, []);
 
   async function loadPlayers() {
-    const { data } = await supabase
-      .from("profiles")
+    const { data } = await (supabase as any)
+      .from("profiles_public")
       .select("id, username, display_name, skill_level, elo_rating, matches_played, wins")
       .order("elo_rating", { ascending: false })
       .limit(100);
