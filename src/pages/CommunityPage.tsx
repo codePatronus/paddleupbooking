@@ -40,7 +40,8 @@ const CommunityPage = () => {
 
   const filtered = players.filter((p) => {
     if (filter !== "all" && p.skill_level !== filter) return false;
-    if (search && !p.username.includes(search.toLowerCase()) && !p.display_name.toLowerCase().includes(search.toLowerCase())) return false;
+    const q = search.toLowerCase();
+    if (q && !p.username.toLowerCase().includes(q) && !p.display_name.toLowerCase().includes(q)) return false;
     return true;
   });
 
@@ -97,7 +98,7 @@ const CommunityPage = () => {
           </Link>
           <Link to="/find-players" className="flex-1">
             <Button variant="outline" className="w-full gap-2 text-sm">
-              <UserPlus className="h-4 w-4" /> My Rooms
+              <UserPlus className="h-4 w-4" /> Rooms
             </Button>
           </Link>
         </div>

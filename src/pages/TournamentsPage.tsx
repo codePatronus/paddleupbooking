@@ -54,7 +54,7 @@ const TournamentsPage = () => {
             .select("id")
             .eq("tournament_id", t.id)
             .eq("player_id", user.id)
-            .single();
+            .maybeSingle();
           is_joined = !!data;
         }
 
@@ -109,18 +109,16 @@ const TournamentsPage = () => {
         ) : (
           <div className="space-y-3">
             {tournaments.map((t) => (
-              <div key={t.id} className="bg-card border rounded-2xl p-4 space-y-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-heading font-bold text-foreground">{t.name}</h3>
-                    {t.description && <p className="text-xs text-muted-foreground mt-0.5">{t.description}</p>}
-                  </div>
+              <div key={t.id} className="bg-card border rounded-2xl p-4 space-y-3 text-center">
+                <div className="flex flex-col items-center gap-2">
                   <Badge className={`text-[10px] ${statusColors[t.status] || ""}`}>
                     {t.status}
                   </Badge>
+                  <h3 className="font-heading font-bold text-foreground">{t.name}</h3>
+                  {t.description && <p className="text-xs text-muted-foreground">{t.description}</p>}
                 </div>
 
-                <div className="flex flex-wrap gap-2 text-xs">
+                <div className="flex flex-wrap justify-center gap-2 text-xs">
                   <span className="flex items-center gap-1 text-muted-foreground">
                     <Calendar className="h-3.5 w-3.5" />
                     {format(new Date(t.start_date), "dd MMM yyyy")}
