@@ -40,14 +40,15 @@ const ProfilePage = () => {
 
   async function loadProfile() {
     setLoading(true);
-    const { data: prof } = await supabase
-      .from("profiles_public" as any)
+    const { data: profRaw } = await (supabase as any)
+      .from("profiles_public")
       .select("*")
       .eq("username", username)
       .single();
 
-    if (!prof) { setLoading(false); return; }
-    setProfileData(prof as ProfileData);
+    if (!profRaw) { setLoading(false); return; }
+    const prof = profRaw as ProfileData;
+    setProfileData(prof);
 
     // Load badges, follows, partners in parallel
     const [badgeRes, followerRes, followingRes] = await Promise.all([
