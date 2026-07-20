@@ -11,6 +11,8 @@ export type Booking = {
   customer_email: string | null;
   amount: number;
   payment_status: 'pending' | 'completed' | 'cancelled';
+  payment_method: 'upi_manual' | 'paddle';
+  paddle_transaction_id: string | null;
   created_at: string;
   updated_at: string;
 };
