@@ -28,8 +28,8 @@ const LeaderboardPage = () => {
   async function loadLeaderboard() {
     setLoading(true);
     const orderCol = tab === "elo" ? "elo_rating" : tab === "wins" ? "wins" : "matches_played";
-    const { data } = await supabase
-      .from("profiles")
+    const { data } = await (supabase as any)
+      .from("profiles_public")
       .select("id, username, display_name, skill_level, elo_rating, matches_played, wins, losses")
       .order(orderCol, { ascending: false })
       .limit(50);
