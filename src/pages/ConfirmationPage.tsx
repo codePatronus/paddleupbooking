@@ -3,8 +3,9 @@ import { useParams, Link } from "react-router-dom";
 import { supabase, formatHour, type Booking } from "@/lib/supabase";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Copy, Home } from "lucide-react";
+import { CheckCircle, Copy, Home, Download } from "lucide-react";
 import { toast } from "sonner";
+import { downloadBookingPdf } from "@/lib/bookingPdf";
 
 const ConfirmationPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -116,6 +117,9 @@ const ConfirmationPage = () => {
           <Link to={`/chat/${booking.id}`}>
             <Button className="w-full" size="lg">Open Chat Room 💬</Button>
           </Link>
+          <Button variant="outline" className="w-full gap-2" onClick={() => downloadBookingPdf(booking)}>
+            <Download className="h-4 w-4" /> Download Receipt PDF
+          </Button>
           <Link to="/book">
             <Button variant="outline" className="w-full">Book Another Slot</Button>
           </Link>

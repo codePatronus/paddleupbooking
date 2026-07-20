@@ -7,7 +7,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { formatHour } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar } from "lucide-react";
+import { ArrowLeft, Calendar, Download } from "lucide-react";
+import { downloadBookingPdf } from "@/lib/bookingPdf";
 
 type BookingItem = {
   id: string;
@@ -97,8 +98,8 @@ const MyBookingsPage = () => {
           bookings.map((b) => {
             const status = getDisplayStatus(b);
             return (
-              <Link key={b.id} to={`/booking/${b.id}`}>
-                <div className="flex items-center gap-3 bg-card border rounded-xl p-4 hover:bg-secondary/50 transition-colors">
+              <div key={b.id} className="flex items-center gap-3 bg-card border rounded-xl p-4 hover:bg-secondary/50 transition-colors">
+                <Link to={`/booking/${b.id}`} className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                     <Calendar className="h-5 w-5 text-primary" />
                   </div>
@@ -111,11 +112,22 @@ const MyBookingsPage = () => {
                     </p>
                     <p className="text-[10px] text-muted-foreground font-mono">{b.booking_id}</p>
                   </div>
-                  <Badge variant="outline" className={`text-[10px] shrink-0 ${status.className}`}>
+                </Link>
+                <div className="flex flex-col items-end gap-2 shrink-0">
+                  <Badge variant="outline" className={`text-[10px] ${status.className}`}>
                     {status.label}
                   </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 gap-1 text-xs"
+                    onClick={(e) => { e.preventDefault(); downloadBookingPdf(b); }}
+                    aria-label="Download PDF"
+                  >
+                    <Download className="h-3.5 w-3.5" /> PDF
+                  </Button>
                 </div>
-              </Link>
+              </div>
             );
           })
         )}
