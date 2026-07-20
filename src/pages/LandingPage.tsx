@@ -180,7 +180,7 @@ const LandingPage = () => {
           <Link to="/refund-policy" className="hover:text-foreground">Refund Policy</Link>
           <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
         </div>
-        <div>© 2026 Paddleup Manipal. All rights reserved.</div>
+        <div>© 2026 PaddleUp Manipal. All rights reserved.</div>
       </footer>
     </div>
   );

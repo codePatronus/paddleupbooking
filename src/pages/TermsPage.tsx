@@ -15,7 +15,7 @@ const TermsPage = () => (
         <h2 className="font-heading font-bold text-base mb-1">1. About us</h2>
         <p>
           These Terms & Conditions ("Terms") govern your use of the website, booking platform,
-          and services (together, the "Service") provided by <strong>Paddleup Manipal</strong>
+          and services (together, the "Service") provided by <strong>PaddleUp Manipal</strong>
           ("we", "us", "our"), operating pickleball courts in Manipal, Karnataka, India. By
           creating an account, booking a slot, or otherwise using the Service you agree to these Terms.
         </p>
@@ -34,7 +34,7 @@ const TermsPage = () => (
       <section>
         <h2 className="font-heading font-bold text-base mb-1">3. The Service</h2>
         <p>
-          Paddleup Manipal lets you view court availability, reserve one-hour slots on our
+          PaddleUp Manipal lets you view court availability, reserve one-hour slots on our
           pickleball courts, pay for those slots, and use community features such as player
           profiles, chat rooms, leaderboards and tournaments. We may add, change, or remove
           features at any time. We do not guarantee that the Service will be uninterrupted or
@@ -104,7 +104,7 @@ const TermsPage = () => (
       <section>
         <h2 className="font-heading font-bold text-base mb-1">9. Intellectual property</h2>
         <p>
-          The Service, including the Paddleup Manipal name, logo, software, and design, is owned
+          The Service, including the PaddleUp Manipal name, logo, software, and design, is owned
           by us or our licensors. You get a limited, non-exclusive, non-transferable right to use
           the Service for personal, non-commercial purposes. No other rights are granted.
         </p>
@@ -143,7 +143,7 @@ const TermsPage = () => (
       <section>
         <h2 className="font-heading font-bold text-base mb-1">13. Indemnity</h2>
         <p>
-          You agree to indemnify and hold Paddleup Manipal harmless from claims arising out of
+          You agree to indemnify and hold PaddleUp Manipal harmless from claims arising out of
           your user content, your use of the Service, or your breach of these Terms.
         </p>
       </section>
