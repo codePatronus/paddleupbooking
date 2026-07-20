@@ -41,7 +41,7 @@ const ProfilePage = () => {
   async function loadProfile() {
     setLoading(true);
     const { data: prof } = await supabase
-      .from("profiles")
+      .from("profiles_public" as any)
       .select("*")
       .eq("username", username)
       .single();
