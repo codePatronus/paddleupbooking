@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { BackButton } from "@/components/BackButton";
 import { useNavigate, Link } from "react-router-dom";
 import { format, addDays } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
@@ -198,7 +199,7 @@ const BookingPage = () => {
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b">
         <div className="container flex items-center h-14 gap-3">
-          <Link to="/"><Button variant="ghost" size="icon" className="shrink-0"><ArrowLeft className="h-5 w-5" /></Button></Link>
+          <BackButton />
           <h1 className="font-heading text-lg font-bold text-gradient-brand">Book a Court</h1>
         </div>
       </header>

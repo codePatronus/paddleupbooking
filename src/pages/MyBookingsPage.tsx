@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { BackButton } from "@/components/BackButton";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,7 +79,7 @@ const MyBookingsPage = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b">
         <div className="container flex items-center h-14 gap-3">
-          <Link to="/"><Button variant="ghost" size="icon"><ArrowLeft className="h-5 w-5" /></Button></Link>
+          <BackButton />
           <h1 className="font-heading text-lg font-bold text-gradient-brand">My Bookings</h1>
         </div>
       </header>

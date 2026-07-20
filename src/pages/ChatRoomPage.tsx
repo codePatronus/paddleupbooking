@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { BackButton } from "@/components/BackButton";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -221,7 +222,7 @@ const ChatRoomPage = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b">
         <div className="container flex items-center h-14 gap-2">
-          <Link to="/find-players"><Button variant="ghost" size="icon"><ArrowLeft className="h-5 w-5" /></Button></Link>
+          <BackButton />
           <div className="flex-1 min-w-0">
             {booking ? (
               <div>
