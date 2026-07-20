@@ -187,7 +187,7 @@ const BookingPage = () => {
   }
 
   const price = selectedSlot ? getSlotPrice(selectedSlot.hour) : 0;
-  const upiId = "paddleupmanipal@upi";
+  const upiId = "krishg2026-3@okhdfcbank";
   const upiLink = selectedSlot
     ? `upi://pay?pa=${upiId}&pn=Paddle%20Up%20Manipal&am=${price}&cu=INR&tn=Court${selectedSlot.court}-${formatHour(selectedSlot.hour)}-${dateStr}`
     : "";

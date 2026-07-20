@@ -137,11 +137,27 @@ const LandingPage = () => {
 
       {/* Info cards */}
       <section className="container pb-12 space-y-3 max-w-md mx-auto px-4">
-        <a href="https://maps.app.goo.gl/5qHaVkp92qcTHf3g8" target="_blank" rel="noopener noreferrer" className="block">
-          <InfoCard icon={<MapPin className="h-5 w-5 text-primary" />} title="Location" description="Manipal, Karnataka — Tap for Google Maps" />
-        </a>
+        <div className="bg-card rounded-xl border overflow-hidden">
+          <div className="flex items-center gap-4 p-4">
+            <MapPin className="h-5 w-5 text-primary shrink-0" />
+            <div>
+              <p className="font-semibold text-sm text-foreground">Location</p>
+              <p className="text-xs text-muted-foreground">PaddleUp Manipal, Karnataka</p>
+            </div>
+          </div>
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3882.03654459489!2d74.77728207447888!3d13.348002906515415!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bbcbbf5ca7f49a1%3A0x7d80eee71ed53a41!2sPaddleUp%20Manipal!5e0!3m2!1sen!2sin!4v1784494031224!5m2!1sen!2sin"
+            width="100%"
+            height="220"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
+            title="PaddleUp Manipal location"
+          />
+        </div>
         <InfoCard icon={<Clock className="h-5 w-5 text-accent" />} title="Hours" description="8:00 AM – 10:00 PM, Every Day" />
-        <a href="https://www.instagram.com/paddleup.manipal" target="_blank" rel="noopener noreferrer" className="block">
+        <a href="https://www.instagram.com/paddleup.manipal" target="_top" rel="noopener noreferrer" className="block">
           <InfoCard icon={<Phone className="h-5 w-5 text-destructive" />} title="Contact" description="DM us on Instagram @paddleup.manipal" />
         </a>
       </section>
