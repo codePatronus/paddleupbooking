@@ -98,7 +98,7 @@ const CommunityPage = () => {
           </Link>
           <Link to="/find-players" className="flex-1">
             <Button variant="outline" className="w-full gap-2 text-sm">
-              <UserPlus className="h-4 w-4" /> My Rooms
+              <UserPlus className="h-4 w-4" /> Rooms
             </Button>
           </Link>
         </div>
