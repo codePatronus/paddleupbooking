@@ -100,90 +100,105 @@ const BookingPage = () => {
     setStep("pay");
   }
 
-  async function handleSubmitBooking() {
-    if (!selectedSlot) return;
-    setLoading(true);
+  // Create a pending booking row. Returns the created booking on success, or null on failure.
+  async function createPendingBooking(paymentMethod: "upi_manual" | "paddle"): Promise<Booking | null> {
+    if (!selectedSlot) return null;
     const amount = getSlotPrice(selectedSlot.hour);
-
-    // Only link user_id if the user has a profile (FK constraint requires profiles row)
     const safeUserId = profile ? user?.id : null;
 
-    try {
-      const { data, error } = await supabase
+    const basePayload = {
+      court_number: selectedSlot.court,
+      booking_date: dateStr,
+      slot_hour: selectedSlot.hour,
+      customer_name: formData.name.trim(),
+      customer_phone: formData.phone.trim(),
+      customer_email: formData.email.trim() || null,
+      amount,
+      payment_status: "pending" as const,
+      payment_method: paymentMethod,
+      user_id: safeUserId || null,
+    };
+
+    let { data, error } = await supabase.from("bookings").insert(basePayload).select().single();
+
+    if (error?.code === "23505") {
+      toast.error("This slot was just booked by someone else!");
+      fetchBookings();
+      setStep("select");
+      setSelectedSlot(null);
+      return null;
+    }
+    if (error?.code === "23503") {
+      const retry = await supabase
         .from("bookings")
-        .insert({
-          court_number: selectedSlot.court,
-          booking_date: dateStr,
-          slot_hour: selectedSlot.hour,
-          customer_name: formData.name.trim(),
-          customer_phone: formData.phone.trim(),
-          customer_email: formData.email.trim() || null,
-          amount,
-          payment_status: "pending",
-          user_id: safeUserId || null,
-        })
+        .insert({ ...basePayload, user_id: null })
         .select()
         .single();
+      data = retry.data;
+      error = retry.error;
+    }
+    if (error || !data) {
+      console.error("Booking insert error:", error);
+      toast.error("Booking failed. Please try again.");
+      return null;
+    }
 
-      if (error) {
-        console.error("Booking insert error:", error);
-        if (error.code === "23505") {
-          toast.error("This slot was just booked by someone else!");
-          fetchBookings();
-          setStep("select");
-          setSelectedSlot(null);
-        } else if (error.code === "23503") {
-          // FK violation — retry without user_id
-          const { data: retryData, error: retryError } = await supabase
-            .from("bookings")
-            .insert({
-              court_number: selectedSlot.court,
-              booking_date: dateStr,
-              slot_hour: selectedSlot.hour,
-              customer_name: formData.name.trim(),
-              customer_phone: formData.phone.trim(),
-              customer_email: formData.email.trim() || null,
-              amount,
-              payment_status: "pending",
-              user_id: null,
-            })
-            .select()
-            .single();
-
-          if (retryError) {
-            console.error("Retry booking error:", retryError);
-            toast.error("Booking failed. Please try again.");
-          } else if (retryData) {
-            toast.success("Booking submitted for approval!");
-            navigate(`/booking/${(retryData as Booking).id}`);
-          }
-        } else {
-          toast.error("Booking failed: " + error.message);
-        }
-        return;
+    // Create match request if toggled on (non-blocking)
+    if (needPlayers && user && profile) {
+      try {
+        await supabase.from("match_requests").insert({
+          booking_id: (data as Booking).id,
+          host_id: user.id,
+          players_needed: playersNeeded,
+          skill_filter: skillFilter === "any" ? null : (skillFilter as "beginner" | "intermediate" | "advanced"),
+          gender_pref: genderPref as "any" | "male" | "female",
+          play_mode: playMode as "casual" | "competitive",
+        });
+      } catch (matchErr) {
+        console.error("Match request error (non-blocking):", matchErr);
       }
+    }
+    return data as Booking;
+  }
 
-      // Create match request if toggled on
-      if (needPlayers && user && profile && data) {
-        try {
-          await supabase.from("match_requests").insert({
-            booking_id: (data as Booking).id,
-            host_id: user.id,
-            players_needed: playersNeeded,
-            skill_filter: skillFilter === "any" ? null : skillFilter as "beginner" | "intermediate" | "advanced",
-            gender_pref: genderPref as "any" | "male" | "female",
-            play_mode: playMode as "casual" | "competitive",
-          });
-        } catch (matchErr) {
-          console.error("Match request error (non-blocking):", matchErr);
-        }
+  async function handleSubmitBooking() {
+    setLoading(true);
+    try {
+      const booking = await createPendingBooking("upi_manual");
+      if (booking) {
+        toast.success("Booking submitted for approval!");
+        navigate(`/booking/${booking.id}`);
       }
+    } finally {
+      setLoading(false);
+    }
+  }
 
-      toast.success("Booking submitted for approval!");
-      navigate(`/booking/${(data as Booking).id}`);
+  async function handlePaddleCheckout() {
+    if (!selectedSlot) return;
+    setLoading(true);
+    try {
+      const priceKey = isPeakHour(selectedSlot.hour) ? "court_slot_peak_price" : "court_slot_offpeak_price";
+      await initializePaddle();
+      const paddlePriceId = await getPaddlePriceId(priceKey);
+
+      const booking = await createPendingBooking("paddle");
+      if (!booking) return;
+
+      window.Paddle.Checkout.open({
+        items: [{ priceId: paddlePriceId, quantity: 1 }],
+        customer: formData.email.trim() ? { email: formData.email.trim() } : undefined,
+        customData: { bookingId: booking.id, userId: user?.id || "" },
+        settings: {
+          displayMode: "overlay",
+          successUrl: `${window.location.origin}/booking/${booking.id}`,
+          allowLogout: false,
+          variant: "one-page",
+        },
+      });
     } catch (err) {
-      console.error("Unexpected booking error:", err);
-      toast.error("Something went wrong. Please try again.");
+      console.error("Paddle checkout error:", err);
+      toast.error("Could not start card checkout. Try UPI instead.");
     } finally {
       setLoading(false);
     }
