@@ -224,6 +224,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "match_requests_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings_availability"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "match_requests_host_id_fkey"
             columns: ["host_id"]
             isOneToOne: false
@@ -548,15 +555,67 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      bookings_availability: {
+        Row: {
+          booking_date: string | null
+          court_number: number | null
+          id: string | null
+          payment_status: string | null
+          slot_hour: number | null
+        }
+        Insert: {
+          booking_date?: string | null
+          court_number?: number | null
+          id?: string | null
+          payment_status?: string | null
+          slot_hour?: number | null
+        }
+        Update: {
+          booking_date?: string | null
+          court_number?: number | null
+          id?: string | null
+          payment_status?: string | null
+          slot_hour?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_email_by_phone: { Args: { p_phone: string }; Returns: string }
       get_email_by_username: { Args: { p_username: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "user"
       gender_pref: "any" | "male" | "female"
       play_mode: "casual" | "competitive"
       request_status: "pending" | "accepted" | "declined"
@@ -689,6 +748,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "user"],
       gender_pref: ["any", "male", "female"],
       play_mode: ["casual", "competitive"],
       request_status: ["pending", "accepted", "declined"],
