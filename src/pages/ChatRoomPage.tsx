@@ -181,8 +181,8 @@ const ChatRoomPage = () => {
     setSearching(true);
     setSearchResult(null);
     const query = searchUuid.trim().toLowerCase();
-    const { data } = await supabase
-      .from("profiles")
+    const { data } = await (supabase as any)
+      .from("profiles_public")
       .select("id, username, display_name, skill_level")
       .or(`username.eq.${query},id.eq.${query}`)
       .limit(1)
