@@ -64,14 +64,11 @@ const BookingPage = () => {
 
   async function fetchBookings() {
     try {
-      const { data, error } = await supabase
-        .from("bookings")
-        .select("*")
-        .eq("booking_date", dateStr)
-        .neq("payment_status", "cancelled");
-      
+      const { data, error } = await supabase.rpc("get_slot_availability", { p_date: dateStr });
       if (error) throw error;
-      setBookings((data as Booking[]) || []);
+      // Map to minimal shape used by isSlotBooked
+      const slots = (data as Array<{ court_number: number; slot_hour: number }>) || [];
+      setBookings(slots.map((s) => ({ court_number: s.court_number, slot_hour: s.slot_hour } as unknown as Booking)));
     } catch (error) {
       console.error("Error fetching bookings:", error);
     }

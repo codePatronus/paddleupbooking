@@ -548,6 +548,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -555,8 +576,23 @@ export type Database = {
     Functions: {
       get_email_by_phone: { Args: { p_phone: string }; Returns: string }
       get_email_by_username: { Args: { p_username: string }; Returns: string }
+      get_slot_availability: {
+        Args: { p_date: string }
+        Returns: {
+          court_number: number
+          slot_hour: number
+        }[]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "user"
       gender_pref: "any" | "male" | "female"
       play_mode: "casual" | "competitive"
       request_status: "pending" | "accepted" | "declined"
@@ -689,6 +725,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "user"],
       gender_pref: ["any", "male", "female"],
       play_mode: ["casual", "competitive"],
       request_status: ["pending", "accepted", "declined"],
