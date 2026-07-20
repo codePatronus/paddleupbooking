@@ -400,36 +400,58 @@ const BookingPage = () => {
       )}
 
       {step === "pay" && selectedSlot && (
-        <div className="flex-1 container py-6 max-w-md mx-auto animate-fade-in">
-          <div className="bg-card border rounded-2xl p-5 space-y-5 text-center">
-            <div className="space-y-2">
-              <p className="font-heading text-2xl font-bold text-foreground">Pay ₹{price}</p>
-              <p className="text-sm text-muted-foreground">
-                Court {selectedSlot.court} • {formatHour(selectedSlot.hour)} – {formatHour(selectedSlot.hour + 1)} • {format(selectedDate, "dd MMM")}
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center gap-3 py-2">
-              <div className="bg-white p-4 rounded-xl border-2 border-primary/20 shadow-sm">
-                <QRCodeSVG value={upiId} size={200} level="H" includeMargin={false} />
+        <>
+          <PaymentTestModeBanner />
+          <div className="flex-1 container py-6 max-w-md mx-auto animate-fade-in">
+            <div className="bg-card border rounded-2xl p-5 space-y-5 text-center">
+              <div className="space-y-2">
+                <p className="font-heading text-2xl font-bold text-foreground">Pay ₹{price}</p>
+                <p className="text-sm text-muted-foreground">
+                  Court {selectedSlot.court} • {formatHour(selectedSlot.hour)} – {formatHour(selectedSlot.hour + 1)} • {format(selectedDate, "dd MMM")}
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground">Scan with any UPI app to pay</p>
-              <p className="text-xs text-muted-foreground">
-                UPI ID: <span className="font-mono font-semibold text-foreground select-all">{upiId}</span>
-              </p>
-            </div>
 
-            <div className="border-t pt-4 space-y-3">
-              <p className="text-sm text-muted-foreground">After payment, submit your booking for admin approval:</p>
-              <Button onClick={handleSubmitBooking} disabled={loading} className="w-full py-5 text-base" size="lg">
-                {loading ? "Submitting..." : "📩 Submit Booking for Approval"}
-              </Button>
-              <p className="text-[10px] text-muted-foreground">Your booking will be confirmed once the admin verifies payment.</p>
-            </div>
+              {/* Option 1: Card / Wallet via Paddle — auto-confirms on payment */}
+              <div className="border rounded-xl p-4 space-y-3 bg-gradient-to-br from-primary/5 to-accent/5">
+                <div className="flex items-center justify-center gap-2 text-sm font-semibold">
+                  <CreditCard className="h-4 w-4" /> Pay with Card / Wallet
+                </div>
+                <p className="text-[11px] text-muted-foreground">Instant confirmation — no admin approval needed.</p>
+                <Button onClick={handlePaddleCheckout} disabled={loading} className="w-full" size="lg">
+                  {loading ? "Opening checkout..." : `Checkout ₹${price}`}
+                </Button>
+              </div>
 
-            <Button variant="ghost" size="sm" onClick={() => setStep("details")} className="text-muted-foreground">← Go Back</Button>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">or</span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+
+              {/* Option 2: UPI manual — needs admin approval */}
+              <div className="border rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-center gap-2 text-sm font-semibold">
+                  <Smartphone className="h-4 w-4" /> Pay via UPI (manual)
+                </div>
+                <div className="flex flex-col items-center gap-2 py-1">
+                  <div className="bg-white p-3 rounded-xl border-2 border-primary/20 shadow-sm">
+                    <QRCodeSVG value={upiId} size={160} level="H" includeMargin={false} />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">Scan with any UPI app</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    UPI ID: <span className="font-mono font-semibold text-foreground select-all">{upiId}</span>
+                  </p>
+                </div>
+                <Button onClick={handleSubmitBooking} disabled={loading} variant="outline" className="w-full">
+                  {loading ? "Submitting..." : "I've Paid — Submit for Approval"}
+                </Button>
+                <p className="text-[10px] text-muted-foreground">Admin will confirm your slot after verifying UPI payment.</p>
+              </div>
+
+              <Button variant="ghost" size="sm" onClick={() => setStep("details")} className="text-muted-foreground">← Go Back</Button>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
