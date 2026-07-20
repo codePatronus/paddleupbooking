@@ -174,8 +174,13 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-4 text-center text-xs text-muted-foreground">
-        © 2026 Paddle Up Manipal. All rights reserved.
+      <footer className="border-t py-4 text-center text-xs text-muted-foreground space-y-2">
+        <div className="flex justify-center gap-4">
+          <Link to="/terms" className="hover:text-foreground">Terms</Link>
+          <Link to="/refund-policy" className="hover:text-foreground">Refund Policy</Link>
+          <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
+        </div>
+        <div>© 2026 Paddleup Manipal. All rights reserved.</div>
       </footer>
     </div>
   );

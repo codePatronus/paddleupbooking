@@ -17,6 +17,9 @@ import FindPlayersPage from "./pages/FindPlayersPage";
 import MyBookingsPage from "./pages/MyBookingsPage";
 import TournamentsPage from "./pages/TournamentsPage";
 import ChatRoomPage from "./pages/ChatRoomPage";
+import TermsPage from "./pages/TermsPage";
+import RefundPolicyPage from "./pages/RefundPolicyPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +45,9 @@ const App = () => (
             <Route path="/my-bookings" element={<MyBookingsPage />} />
             <Route path="/tournaments" element={<TournamentsPage />} />
             <Route path="/chat/:roomId" element={<ChatRoomPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/refund-policy" element={<RefundPolicyPage />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
