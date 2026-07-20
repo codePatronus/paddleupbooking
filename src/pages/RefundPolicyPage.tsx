@@ -22,14 +22,19 @@ const RefundPolicyPage = () => (
       <section>
         <h2 className="font-heading font-bold text-base mb-1">Refund window</h2>
         <p>
-          You can request a <strong>full refund</strong> within <strong>14 days</strong> of your
-          booking date, provided you cancel <strong>at least 24 hours before</strong> your slot
-          start time.
+          You may request a <strong>full refund</strong> for any booking within <strong>14 days</strong>{" "}
+          from the date the booking was made. This 14-day refund period applies regardless of when
+          your slot takes place, so you have at least two weeks to change your mind.
         </p>
         <p className="mt-2">
-          Cancellations made <strong>less than 24 hours before</strong> the slot, or requested
-          <strong> more than 14 days after</strong> the booking date, are non-refundable, because
-          the court has already been held for you and cannot be re-booked in time.
+          To keep scheduling fair for everyone, we ask that you also cancel your slot at least{" "}
+          <strong>24 hours before</strong> the scheduled start time. Cancellations made less than
+          24 hours before the slot may not qualify for a refund, even if they fall within the 14-day
+          window, because the court has already been held for you and cannot be re-booked in time.
+        </p>
+        <p className="mt-2">
+          Refund requests received <strong>more than 14 days after</strong> the booking date are not
+          eligible for a refund.
         </p>
       </section>
 
