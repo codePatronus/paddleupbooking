@@ -54,7 +54,7 @@ const TournamentsPage = () => {
             .select("id")
             .eq("tournament_id", t.id)
             .eq("player_id", user.id)
-            .single();
+            .maybeSingle();
           is_joined = !!data;
         }
 
