@@ -14,21 +14,22 @@ const RefundPolicyPage = () => (
       <section>
         <h2 className="font-heading font-bold text-base mb-1">Our promise</h2>
         <p>
-          At <strong>Paddleup Manipal</strong> we want you on the court, not chasing invoices.
+          At <strong>PaddleUp Manipal</strong> we want you on the court, not chasing invoices.
           If plans change, this policy explains when you can get your money back.
         </p>
       </section>
 
       <section>
-        <h2 className="font-heading font-bold text-base mb-1">Cancellation window</h2>
+        <h2 className="font-heading font-bold text-base mb-1">Refund window</h2>
         <p>
-          You can cancel a booking and receive a <strong>full refund</strong> if you cancel
-          <strong> at least 24 hours before</strong> your slot start time.
+          You can request a <strong>full refund</strong> within <strong>14 days</strong> of your
+          booking date, provided you cancel <strong>at least 24 hours before</strong> your slot
+          start time.
         </p>
         <p className="mt-2">
-          Cancellations made <strong>less than 24 hours before</strong> the slot are
-          non-refundable, because the court has already been held for you and cannot be
-          re-booked in time.
+          Cancellations made <strong>less than 24 hours before</strong> the slot, or requested
+          <strong> more than 14 days after</strong> the booking date, are non-refundable, because
+          the court has already been held for you and cannot be re-booked in time.
         </p>
       </section>
 
