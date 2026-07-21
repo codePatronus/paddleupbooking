@@ -9,32 +9,28 @@ const RefundPolicyPage = () => (
       </div>
     </header>
     <main className="container max-w-2xl py-8 space-y-5 text-sm leading-relaxed text-foreground">
-      <p className="text-xs text-muted-foreground">Last updated: 20 July 2026</p>
+      <p className="text-xs text-muted-foreground">Last updated: 21 July 2026</p>
 
       <section>
-        <h2 className="font-heading font-bold text-base mb-1">Our promise</h2>
+        <h2 className="font-heading font-bold text-base mb-1">What you're buying</h2>
         <p>
-          At <strong>PaddleUp Manipal</strong> we want you on the court, not chasing invoices.
-          If plans change, this policy explains when you can get your money back.
+          Every purchase on PaddleUp Manipal is a <strong>Digital Access Pass</strong> — a
+          time-limited digital licence delivered electronically through our platform. This
+          policy explains when you can get your money back for that digital purchase.
         </p>
       </section>
 
       <section>
-        <h2 className="font-heading font-bold text-base mb-1">Refund window</h2>
+        <h2 className="font-heading font-bold text-base mb-1">30-day money-back guarantee</h2>
         <p>
-          You may request a <strong>full refund</strong> for any booking within <strong>14 days</strong>{" "}
-          from the date the booking was made. This 14-day refund period applies regardless of when
-          your slot takes place, so you have at least two weeks to change your mind.
+          You may request a <strong>full refund</strong> for any Digital Access Pass within{" "}
+          <strong>30 days</strong> of the purchase date, for any reason. Just contact us
+          within that window and we'll process the refund to your original payment method.
         </p>
         <p className="mt-2">
-          To keep scheduling fair for everyone, we ask that you also cancel your slot at least{" "}
-          <strong>24 hours before</strong> the scheduled start time. Cancellations made less than
-          24 hours before the slot may not qualify for a refund, even if they fall within the 14-day
-          window, because the court has already been held for you and cannot be re-booked in time.
-        </p>
-        <p className="mt-2">
-          Refund requests received <strong>more than 14 days after</strong> the booking date are not
-          eligible for a refund.
+          This 30-day guarantee applies regardless of when the reservation window on the
+          Digital Access Pass falls, so you have a full month to change your mind about a
+          purchase.
         </p>
       </section>
 
@@ -76,17 +72,12 @@ const RefundPolicyPage = () => (
       </section>
 
       <section>
-        <h2 className="font-heading font-bold text-base mb-1">Exceptions</h2>
-        <ul className="list-disc pl-5 space-y-1 mt-1">
-          <li>
-            If we cancel a slot on our end (weather, maintenance, court unavailability) you
-            get a full refund regardless of timing, or the option to reschedule.
-          </li>
-          <li>
-            If you paid via UPI manually and the payment was never verified by us, the booking
-            is cancelled automatically and there is nothing to refund.
-          </li>
-        </ul>
+        <h2 className="font-heading font-bold text-base mb-1">If we cancel</h2>
+        <p>
+          If we cancel or revoke a Digital Access Pass on our end (for example a platform
+          issue, maintenance window, or scheduling error) you get a full refund regardless of
+          timing, or the option to be re-issued a new pass for another slot.
+        </p>
       </section>
 
       <section>

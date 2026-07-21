@@ -15,8 +15,9 @@ const PrivacyPolicyPage = () => (
         <h2 className="font-heading font-bold text-base mb-1">1. Who we are</h2>
         <p>
           <strong>PaddleUp Manipal</strong> ("we", "us", "our") runs the PaddleUp Manipal
-          website and booking platform in Manipal, Karnataka, India. We are the data controller
-          for the personal data described in this notice.
+          website and digital booking platform, through which we sell Digital Access Passes
+          and related digital services. We are the data controller for the personal data
+          described in this notice.
         </p>
       </section>
 
