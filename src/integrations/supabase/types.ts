@@ -728,6 +728,31 @@ export type Database = {
     Functions: {
       get_email_by_phone: { Args: { p_phone: string }; Returns: string }
       get_email_by_username: { Args: { p_username: string }; Returns: string }
+      get_my_profile: {
+        Args: never
+        Returns: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string
+          elo_rating: number
+          gender: string | null
+          id: string
+          losses: number
+          matches_played: number
+          phone: string | null
+          skill_level: Database["public"]["Enums"]["skill_level"]
+          updated_at: string
+          username: string
+          wins: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_slot_availability: {
         Args: { p_date: string }
         Returns: {
