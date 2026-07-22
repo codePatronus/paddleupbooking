@@ -12,9 +12,12 @@ const LandingPage = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b">
         <div className="container flex items-center justify-between h-16">
-          <h1 className="font-heading text-xl font-bold text-gradient-brand">
-            🏓 Paddle Up Manipal
-          </h1>
+          <Link to="/" className="flex items-center gap-2">
+            <img src={logo} alt="PaddleUp Manipal logo" className="h-10 w-10 rounded-lg object-cover" />
+            <span className="font-heading text-lg font-bold text-gradient-brand hidden sm:inline">
+              Paddle Up Manipal
+            </span>
+          </Link>
           <div className="flex items-center gap-2">
             {!loading && (
               user ? (
@@ -50,6 +53,7 @@ const LandingPage = () => {
       {/* Hero */}
       <section className="flex-1 flex flex-col items-center justify-center px-4 py-12 text-center">
         <div className="animate-fade-in space-y-6 max-w-md">
+          <img src={logo} alt="PaddleUp Manipal" className="mx-auto h-32 w-32 rounded-2xl shadow-lg object-cover" />
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
             <span className="h-2 w-2 rounded-full bg-primary animate-pulse-soft" />
             Now Open — Book Your Court!
