@@ -439,6 +439,11 @@ const BookingPage = () => {
                     UPI ID: <span className="font-mono font-semibold text-foreground select-all">{upiId}</span>
                   </p>
                 </div>
+                <a href={upiLink} className="block md:hidden">
+                  <Button type="button" variant="secondary" className="w-full">
+                    <Smartphone className="h-4 w-4 mr-2" /> Pay ₹{price} in UPI App
+                  </Button>
+                </a>
                 <Button onClick={handleSubmitBooking} disabled={loading} variant="outline" className="w-full">
                   {loading ? "Submitting..." : "I've Paid — Submit for Approval"}
                 </Button>
