@@ -203,9 +203,13 @@ const BookingPage = () => {
 
   const price = selectedSlot ? getSlotPrice(selectedSlot.hour) : 0;
   const upiId = "krishg2026-3@okhdfcbank";
-  const upiLink = selectedSlot
-    ? `upi://pay?pa=${upiId}&pn=Paddle%20Up%20Manipal&am=${price}&cu=INR&tn=Court${selectedSlot.court}-${formatHour(selectedSlot.hour)}-${dateStr}`
+  const upiParams = selectedSlot
+    ? `pa=${upiId}&pn=Paddle%20Up%20Manipal&am=${price}&cu=INR&tn=Court${selectedSlot.court}-${formatHour(selectedSlot.hour)}-${dateStr}`
     : "";
+  const upiLink = upiParams ? `upi://pay?${upiParams}` : "";
+  const gpayLink = upiParams ? `tez://upi/pay?${upiParams}` : "";
+  const phonepeLink = upiParams ? `phonepe://pay?${upiParams}` : "";
+  const paytmLink = upiParams ? `paytmmp://pay?${upiParams}` : "";
 
   const dates = Array.from({ length: 7 }, (_, i) => addDays(new Date(), i));
 
@@ -439,9 +443,20 @@ const BookingPage = () => {
                     UPI ID: <span className="font-mono font-semibold text-foreground select-all">{upiId}</span>
                   </p>
                 </div>
+                <div className="grid grid-cols-3 gap-2 md:hidden">
+                  <a href={gpayLink}>
+                    <Button type="button" variant="secondary" size="sm" className="w-full text-[11px]">GPay</Button>
+                  </a>
+                  <a href={phonepeLink}>
+                    <Button type="button" variant="secondary" size="sm" className="w-full text-[11px]">PhonePe</Button>
+                  </a>
+                  <a href={paytmLink}>
+                    <Button type="button" variant="secondary" size="sm" className="w-full text-[11px]">Paytm</Button>
+                  </a>
+                </div>
                 <a href={upiLink} className="block md:hidden">
-                  <Button type="button" variant="secondary" className="w-full">
-                    <Smartphone className="h-4 w-4 mr-2" /> Pay ₹{price} in UPI App
+                  <Button type="button" variant="outline" size="sm" className="w-full text-[11px]">
+                    <Smartphone className="h-3.5 w-3.5 mr-1.5" /> Any other UPI app
                   </Button>
                 </a>
                 <Button onClick={handleSubmitBooking} disabled={loading} variant="outline" className="w-full">
