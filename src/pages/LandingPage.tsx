@@ -3,6 +3,7 @@ import { MapPin, Clock, Phone, Users, Trophy, MessageCircle, LogIn, LogOut, User
 import logo from "@/assets/paddleup-logo.jpg";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import NotificationBell from "@/components/NotificationBell";
 
 const LandingPage = () => {
   const { user, profile, loading, signOut } = useAuth();
