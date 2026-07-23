@@ -203,9 +203,13 @@ const BookingPage = () => {
 
   const price = selectedSlot ? getSlotPrice(selectedSlot.hour) : 0;
   const upiId = "krishg2026-3@okhdfcbank";
-  const upiLink = selectedSlot
-    ? `upi://pay?pa=${upiId}&pn=Paddle%20Up%20Manipal&am=${price}&cu=INR&tn=Court${selectedSlot.court}-${formatHour(selectedSlot.hour)}-${dateStr}`
+  const upiParams = selectedSlot
+    ? `pa=${upiId}&pn=Paddle%20Up%20Manipal&am=${price}&cu=INR&tn=Court${selectedSlot.court}-${formatHour(selectedSlot.hour)}-${dateStr}`
     : "";
+  const upiLink = upiParams ? `upi://pay?${upiParams}` : "";
+  const gpayLink = upiParams ? `tez://upi/pay?${upiParams}` : "";
+  const phonepeLink = upiParams ? `phonepe://pay?${upiParams}` : "";
+  const paytmLink = upiParams ? `paytmmp://pay?${upiParams}` : "";
 
   const dates = Array.from({ length: 7 }, (_, i) => addDays(new Date(), i));
 
