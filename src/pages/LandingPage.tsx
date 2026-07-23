@@ -3,6 +3,7 @@ import { MapPin, Clock, Phone, Users, Trophy, MessageCircle, LogIn, LogOut, User
 import logo from "@/assets/paddleup-logo.jpg";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import NotificationBell from "@/components/NotificationBell";
 
 const LandingPage = () => {
   const { user, profile, loading, signOut } = useAuth();
@@ -22,6 +23,7 @@ const LandingPage = () => {
             {!loading && (
               user ? (
                 <div className="flex items-center gap-1">
+                  <NotificationBell />
                   {profile && (
                     <Link to={`/player/${profile.username}`}>
                       <Button variant="ghost" size="sm" className="text-xs gap-1">
