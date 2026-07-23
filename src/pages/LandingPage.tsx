@@ -23,6 +23,7 @@ const LandingPage = () => {
             {!loading && (
               user ? (
                 <div className="flex items-center gap-1">
+                  <NotificationBell />
                   {profile && (
                     <Link to={`/player/${profile.username}`}>
                       <Button variant="ghost" size="sm" className="text-xs gap-1">
