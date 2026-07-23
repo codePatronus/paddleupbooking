@@ -443,11 +443,27 @@ const BookingPage = () => {
                     UPI ID: <span className="font-mono font-semibold text-foreground select-all">{upiId}</span>
                   </p>
                 </div>
+                <div className="grid grid-cols-3 gap-2 md:hidden">
+                  <a href={gpayLink}>
+                    <Button type="button" variant="secondary" size="sm" className="w-full text-[11px]">GPay</Button>
+                  </a>
+                  <a href={phonepeLink}>
+                    <Button type="button" variant="secondary" size="sm" className="w-full text-[11px]">PhonePe</Button>
+                  </a>
+                  <a href={paytmLink}>
+                    <Button type="button" variant="secondary" size="sm" className="w-full text-[11px]">Paytm</Button>
+                  </a>
+                </div>
                 <a href={upiLink} className="block md:hidden">
-                  <Button type="button" variant="secondary" className="w-full">
-                    <Smartphone className="h-4 w-4 mr-2" /> Pay ₹{price} in UPI App
+                  <Button type="button" variant="outline" size="sm" className="w-full text-[11px]">
+                    <Smartphone className="h-3.5 w-3.5 mr-1.5" /> Any other UPI app
                   </Button>
                 </a>
+                <Button onClick={handleSubmitBooking} disabled={loading} variant="outline" className="w-full">
+                  {loading ? "Submitting..." : "I've Paid — Submit for Approval"}
+                </Button>
+                <p className="text-[10px] text-muted-foreground">Admin will confirm your slot after verifying UPI payment.</p>
+              </div>
                 <Button onClick={handleSubmitBooking} disabled={loading} variant="outline" className="w-full">
                   {loading ? "Submitting..." : "I've Paid — Submit for Approval"}
                 </Button>
