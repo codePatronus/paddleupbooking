@@ -464,11 +464,6 @@ const BookingPage = () => {
                 </Button>
                 <p className="text-[10px] text-muted-foreground">Admin will confirm your slot after verifying UPI payment.</p>
               </div>
-                <Button onClick={handleSubmitBooking} disabled={loading} variant="outline" className="w-full">
-                  {loading ? "Submitting..." : "I've Paid — Submit for Approval"}
-                </Button>
-                <p className="text-[10px] text-muted-foreground">Admin will confirm your slot after verifying UPI payment.</p>
-              </div>
 
               <Button variant="ghost" size="sm" onClick={() => setStep("details")} className="text-muted-foreground">← Go Back</Button>
             </div>
