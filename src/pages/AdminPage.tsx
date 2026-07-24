@@ -1,15 +1,42 @@
 import { useState, useEffect, useMemo } from "react";
-import { format, addDays, subDays, startOfWeek, startOfMonth, subMonths, subWeeks, parseISO, eachDayOfInterval, differenceInDays } from "date-fns";
+import { format, addDays, subDays, parseISO, eachDayOfInterval, differenceInDays } from "date-fns";
 import * as XLSX from "xlsx";
-import { supabase, COURTS, SLOT_HOURS, formatHour, type Booking } from "@/lib/supabase";
+import { supabase, COURTS, SLOT_HOURS, formatHour, getSlotPrice, type Booking } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, LogOut, Search, Download, BarChart3, LayoutGrid } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, Search, Download, BarChart3, LayoutGrid, Users, Trophy, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const ADMIN_PIN = "2024";
+
+type PlayerRow = {
+  id: string;
+  username: string;
+  display_name: string;
+  phone: string | null;
+  skill_level: string;
+  gender: string | null;
+  elo_rating: number;
+  matches_played: number;
+  created_at: string;
+};
+
+type TournamentRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  format: string;
+  start_date: string;
+  end_date: string | null;
+  status: string;
+  max_participants: number | null;
+  participant_count?: number;
+};
+
 
 const AdminPage = () => {
   const [authenticated, setAuthenticated] = useState(false);
