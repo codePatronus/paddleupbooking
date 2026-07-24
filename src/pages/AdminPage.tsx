@@ -433,15 +433,53 @@ const AdminPage = () => {
             ))}
           </div>
 
-          {/* Search + view */}
-          <div className="flex gap-2">
-            <div className="relative flex-1">
+          {/* Search + view + add */}
+          <div className="flex gap-2 flex-wrap">
+            <div className="relative flex-1 min-w-[180px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Search name, phone, booking ID..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
             </div>
             <Button variant={view === "grid" ? "default" : "outline"} size="sm" onClick={() => setView("grid")}>Grid</Button>
             <Button variant={view === "list" ? "default" : "outline"} size="sm" onClick={() => setView("list")}>List</Button>
+            <Button size="sm" onClick={() => setShowAddBooking(v => !v)} className="gap-1"><Plus className="h-3.5 w-3.5" />Add</Button>
           </div>
+
+          {showAddBooking && (
+            <div className="bg-card border rounded-xl p-4 space-y-3 animate-fade-in">
+              <p className="font-semibold text-sm">➕ Add booking for {format(selectedDate, "dd MMM yyyy")}</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[10px] text-muted-foreground">Court</label>
+                  <Select value={String(nb.court_number)} onValueChange={v => setNb({ ...nb, court_number: Number(v) })}>
+                    <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>{COURTS.map(c => <SelectItem key={c} value={String(c)}>Court {c}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] text-muted-foreground">Slot</label>
+                  <Select value={String(nb.slot_hour)} onValueChange={v => setNb({ ...nb, slot_hour: Number(v) })}>
+                    <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>{SLOT_HOURS.map(h => <SelectItem key={h} value={String(h)}>{formatHour(h)} — ₹{getSlotPrice(h)}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Input placeholder="Customer name *" value={nb.customer_name} onChange={e => setNb({ ...nb, customer_name: e.target.value })} className="h-9 text-xs" />
+              <Input placeholder="Phone *" value={nb.customer_phone} onChange={e => setNb({ ...nb, customer_phone: e.target.value })} className="h-9 text-xs" />
+              <Input placeholder="Email (optional)" value={nb.customer_email} onChange={e => setNb({ ...nb, customer_email: e.target.value })} className="h-9 text-xs" />
+              <Select value={nb.payment_status} onValueChange={v => setNb({ ...nb, payment_status: v as any })}>
+                <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="completed">Paid / Confirmed</SelectItem>
+                  <SelectItem value="pending">Pending payment</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="flex gap-2">
+                <Button size="sm" className="flex-1" onClick={addBookingByAdmin} disabled={addingB}>{addingB ? "Saving..." : "Save booking"}</Button>
+                <Button size="sm" variant="outline" onClick={() => setShowAddBooking(false)}>Cancel</Button>
+              </div>
+            </div>
+          )}
+
 
           {view === "grid" && (
             <div className="space-y-1 overflow-x-auto">
