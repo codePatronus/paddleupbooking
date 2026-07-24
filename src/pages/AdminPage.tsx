@@ -60,6 +60,35 @@ const AdminPage = () => {
   const [exportFrom, setExportFrom] = useState(format(subDays(new Date(), 30), "yyyy-MM-dd"));
   const [exportTo, setExportTo] = useState(format(new Date(), "yyyy-MM-dd"));
 
+  // Players tab
+  const [players, setPlayers] = useState<PlayerRow[]>([]);
+  const [playerSearch, setPlayerSearch] = useState("");
+
+  // Tournaments tab
+  const [tournaments, setTournaments] = useState<TournamentRow[]>([]);
+  const [tForm, setTForm] = useState({
+    name: "",
+    description: "",
+    format: "ladder",
+    start_date: format(new Date(), "yyyy-MM-dd"),
+    end_date: "",
+    max_participants: 32,
+  });
+  const [creatingT, setCreatingT] = useState(false);
+
+  // Add booking form
+  const [showAddBooking, setShowAddBooking] = useState(false);
+  const [nb, setNb] = useState({
+    court_number: 1,
+    slot_hour: 8,
+    customer_name: "",
+    customer_phone: "",
+    customer_email: "",
+    payment_status: "completed" as "pending" | "completed",
+  });
+  const [addingB, setAddingB] = useState(false);
+
+
   const dateStr = format(selectedDate, "yyyy-MM-dd");
 
   useEffect(() => {
