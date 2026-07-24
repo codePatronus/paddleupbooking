@@ -106,7 +106,95 @@ const AdminPage = () => {
 
   useEffect(() => {
     if (authenticated && tab === "analytics") fetchAllBookings();
+    if (authenticated && tab === "players") fetchPlayers();
+    if (authenticated && tab === "tournaments") fetchTournaments();
   }, [authenticated, tab]);
+
+  async function fetchPlayers() {
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, username, display_name, phone, skill_level, gender, elo_rating, matches_played, created_at")
+      .order("created_at", { ascending: false });
+    setPlayers((data as PlayerRow[]) || []);
+  }
+
+  async function fetchTournaments() {
+    const { data: rows } = await supabase
+      .from("tournaments")
+      .select("*")
+      .order("start_date", { ascending: false });
+    if (!rows) { setTournaments([]); return; }
+    const withCounts = await Promise.all((rows as TournamentRow[]).map(async (t) => {
+      const { count } = await supabase
+        .from("tournament_participants")
+        .select("id", { count: "exact", head: true })
+        .eq("tournament_id", t.id);
+      return { ...t, participant_count: count || 0 };
+    }));
+    setTournaments(withCounts);
+  }
+
+  async function createTournament() {
+    if (!tForm.name || !tForm.start_date) { toast.error("Name and start date required"); return; }
+    setCreatingT(true);
+    const { error } = await supabase.from("tournaments").insert({
+      name: tForm.name,
+      description: tForm.description || "",
+      format: tForm.format,
+      start_date: tForm.start_date,
+      end_date: tForm.end_date || null,
+      max_participants: Number(tForm.max_participants) || 32,
+      status: "upcoming",
+    } as any);
+    setCreatingT(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Tournament created 🏆");
+    setTForm({ ...tForm, name: "", description: "", end_date: "" });
+    fetchTournaments();
+  }
+
+  async function updateTournamentStatus(id: string, status: string) {
+    const { error } = await supabase.from("tournaments").update({ status: status as any }).eq("id", id);
+    if (error) { toast.error("Failed"); return; }
+    toast.success("Status updated");
+    fetchTournaments();
+  }
+
+  async function deleteTournament(id: string) {
+    if (!confirm("Delete this tournament? Participants will be removed.")) return;
+    const { error } = await supabase.from("tournaments").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete"); return; }
+    toast.success("Tournament deleted");
+    fetchTournaments();
+  }
+
+  async function addBookingByAdmin() {
+    if (!nb.customer_name || !nb.customer_phone) { toast.error("Name and phone required"); return; }
+    setAddingB(true);
+    const amount = getSlotPrice(nb.slot_hour);
+    const { error } = await supabase.from("bookings").insert({
+      court_number: nb.court_number,
+      booking_date: dateStr,
+      slot_hour: nb.slot_hour,
+      customer_name: nb.customer_name,
+      customer_phone: nb.customer_phone,
+      customer_email: nb.customer_email || null,
+      amount,
+      payment_status: nb.payment_status,
+      payment_method: "upi_manual",
+      user_id: null,
+    } as any);
+    setAddingB(false);
+    if (error) {
+      toast.error(error.code === "23505" ? "Slot already booked" : error.message);
+      return;
+    }
+    toast.success("Booking added ✅");
+    setShowAddBooking(false);
+    setNb({ ...nb, customer_name: "", customer_phone: "", customer_email: "" });
+    fetchBookings();
+  }
+
 
   async function fetchBookings() {
     const { data } = await supabase
