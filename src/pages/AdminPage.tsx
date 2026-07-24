@@ -41,7 +41,8 @@ type TournamentRow = {
 const AdminPage = () => {
   const [authenticated, setAuthenticated] = useState(false);
   const [pin, setPin] = useState("");
-  const [tab, setTab] = useState<"bookings" | "analytics">("bookings");
+  const [tab, setTab] = useState<"bookings" | "players" | "tournaments" | "analytics">("bookings");
+
 
   // Bookings tab state
   const [selectedDate, setSelectedDate] = useState(new Date());
