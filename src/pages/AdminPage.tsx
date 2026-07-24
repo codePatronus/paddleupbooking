@@ -381,14 +381,21 @@ const AdminPage = () => {
           <h1 className="font-heading text-lg font-bold text-gradient-brand">📊 Admin Dashboard</h1>
           <Button variant="ghost" size="icon" onClick={() => setAuthenticated(false)}><LogOut className="h-4 w-4" /></Button>
         </div>
-        <div className="container flex gap-1 pb-2">
-          <Button variant={tab === "bookings" ? "default" : "ghost"} size="sm" onClick={() => setTab("bookings")} className="gap-1.5">
+        <div className="container flex gap-1 pb-2 overflow-x-auto">
+          <Button variant={tab === "bookings" ? "default" : "ghost"} size="sm" onClick={() => setTab("bookings")} className="gap-1.5 shrink-0">
             <LayoutGrid className="h-3.5 w-3.5" /> Bookings
           </Button>
-          <Button variant={tab === "analytics" ? "default" : "ghost"} size="sm" onClick={() => setTab("analytics")} className="gap-1.5">
+          <Button variant={tab === "players" ? "default" : "ghost"} size="sm" onClick={() => setTab("players")} className="gap-1.5 shrink-0">
+            <Users className="h-3.5 w-3.5" /> Players
+          </Button>
+          <Button variant={tab === "tournaments" ? "default" : "ghost"} size="sm" onClick={() => setTab("tournaments")} className="gap-1.5 shrink-0">
+            <Trophy className="h-3.5 w-3.5" /> Tournaments
+          </Button>
+          <Button variant={tab === "analytics" ? "default" : "ghost"} size="sm" onClick={() => setTab("analytics")} className="gap-1.5 shrink-0">
             <BarChart3 className="h-3.5 w-3.5" /> Analytics
           </Button>
         </div>
+
       </header>
 
       {tab === "bookings" && (
