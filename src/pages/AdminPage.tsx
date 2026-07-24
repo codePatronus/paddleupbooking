@@ -552,7 +552,123 @@ const AdminPage = () => {
         </div>
       )}
 
+      {tab === "players" && (
+        <div className="container py-4 space-y-3 max-w-2xl mx-auto">
+          <div className="bg-card border rounded-xl p-3 flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" />
+            <p className="font-semibold text-sm">{players.length} registered players</p>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search username, name, phone..." value={playerSearch} onChange={e => setPlayerSearch(e.target.value)} className="pl-9" />
+          </div>
+          <div className="space-y-2">
+            {players
+              .filter(p => {
+                if (!playerSearch) return true;
+                const q = playerSearch.toLowerCase();
+                return p.username.toLowerCase().includes(q) ||
+                  p.display_name.toLowerCase().includes(q) ||
+                  (p.phone || "").includes(q);
+              })
+              .map(p => (
+                <div key={p.id} className="bg-card border rounded-xl p-3 space-y-1">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm truncate">{p.display_name}</p>
+                      <p className="text-xs text-muted-foreground">@{p.username}</p>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/10 text-accent shrink-0">{p.skill_level}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1 text-[11px] text-muted-foreground">
+                    <span>📞 {p.phone || "—"}</span>
+                    <span>👤 {p.gender || "—"}</span>
+                    <span>🎯 ELO {p.elo_rating}</span>
+                    <span>🏓 {p.matches_played} matches</span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">Joined {format(parseISO(p.created_at), "dd MMM yyyy")}</p>
+                </div>
+              ))}
+            {players.length === 0 && <p className="text-center text-muted-foreground text-sm py-8">No players yet</p>}
+          </div>
+        </div>
+      )}
+
+      {tab === "tournaments" && (
+        <div className="container py-4 space-y-4 max-w-2xl mx-auto">
+          <div className="bg-card border rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <Trophy className="h-4 w-4 text-primary" />
+              <p className="font-semibold text-sm">Create tournament</p>
+            </div>
+            <Input placeholder="Tournament name *" value={tForm.name} onChange={e => setTForm({ ...tForm, name: e.target.value })} className="h-9 text-xs" />
+            <Textarea placeholder="Description" value={tForm.description} onChange={e => setTForm({ ...tForm, description: e.target.value })} rows={2} className="text-xs" />
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <label className="text-[10px] text-muted-foreground">Format</label>
+                <Select value={tForm.format} onValueChange={v => setTForm({ ...tForm, format: v })}>
+                  <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ladder">Ladder</SelectItem>
+                    <SelectItem value="knockout">Knockout</SelectItem>
+                    <SelectItem value="round_robin">Round Robin</SelectItem>
+                    <SelectItem value="league">League</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] text-muted-foreground">Max players</label>
+                <Input type="number" min={2} value={tForm.max_participants} onChange={e => setTForm({ ...tForm, max_participants: Number(e.target.value) })} className="h-9 text-xs" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] text-muted-foreground">Start date *</label>
+                <Input type="date" value={tForm.start_date} onChange={e => setTForm({ ...tForm, start_date: e.target.value })} className="h-9 text-xs" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] text-muted-foreground">End date</label>
+                <Input type="date" value={tForm.end_date} onChange={e => setTForm({ ...tForm, end_date: e.target.value })} className="h-9 text-xs" />
+              </div>
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              Tip: reserve courts for the tournament by adding bookings in the Bookings tab (use the customer name "Tournament — {tForm.name || 'name'}") and collect payments manually.
+            </p>
+            <Button size="sm" onClick={createTournament} disabled={creatingT} className="w-full gap-1">
+              <Plus className="h-3.5 w-3.5" /> {creatingT ? "Creating..." : "Create tournament"}
+            </Button>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-muted-foreground">All tournaments ({tournaments.length})</p>
+            {tournaments.map(t => (
+              <div key={t.id} className="bg-card border rounded-xl p-3 space-y-2">
+                <div className="flex justify-between items-start gap-2">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm">{t.name}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {format(parseISO(t.start_date), "dd MMM yyyy")}
+                      {t.end_date && ` – ${format(parseISO(t.end_date), "dd MMM yyyy")}`}
+                      {" • "}{t.format} • {t.participant_count}/{t.max_participants || "∞"} joined
+                    </p>
+                  </div>
+                  <Button size="icon" variant="ghost" onClick={() => deleteTournament(t.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                </div>
+                {t.description && <p className="text-[11px] text-muted-foreground">{t.description}</p>}
+                <div className="flex gap-1 flex-wrap">
+                  {["upcoming", "active", "completed"].map(s => (
+                    <Button key={s} size="sm" variant={t.status === s ? "default" : "outline"} className="h-7 text-[10px]" onClick={() => updateTournamentStatus(t.id, s)}>
+                      {s}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            ))}
+            {tournaments.length === 0 && <p className="text-center text-muted-foreground text-sm py-6">No tournaments yet</p>}
+          </div>
+        </div>
+      )}
+
       {tab === "analytics" && (
+
         <div className="container py-4 space-y-5 max-w-3xl mx-auto">
           {/* Export */}
           <div className="bg-card border rounded-xl p-4 space-y-3">
