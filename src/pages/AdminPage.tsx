@@ -1,20 +1,48 @@
 import { useState, useEffect, useMemo } from "react";
-import { format, addDays, subDays, startOfWeek, startOfMonth, subMonths, subWeeks, parseISO, eachDayOfInterval, differenceInDays } from "date-fns";
+import { format, addDays, subDays, parseISO, eachDayOfInterval, differenceInDays } from "date-fns";
 import * as XLSX from "xlsx";
-import { supabase, COURTS, SLOT_HOURS, formatHour, type Booking } from "@/lib/supabase";
+import { supabase, COURTS, SLOT_HOURS, formatHour, getSlotPrice, type Booking } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, LogOut, Search, Download, BarChart3, LayoutGrid } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, Search, Download, BarChart3, LayoutGrid, Users, Trophy, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const ADMIN_PIN = "2024";
+
+type PlayerRow = {
+  id: string;
+  username: string;
+  display_name: string;
+  phone: string | null;
+  skill_level: string;
+  gender: string | null;
+  elo_rating: number;
+  matches_played: number;
+  created_at: string;
+};
+
+type TournamentRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  format: string;
+  start_date: string;
+  end_date: string | null;
+  status: string;
+  max_participants: number | null;
+  participant_count?: number;
+};
+
 
 const AdminPage = () => {
   const [authenticated, setAuthenticated] = useState(false);
   const [pin, setPin] = useState("");
-  const [tab, setTab] = useState<"bookings" | "analytics">("bookings");
+  const [tab, setTab] = useState<"bookings" | "players" | "tournaments" | "analytics">("bookings");
+
 
   // Bookings tab state
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -31,6 +59,35 @@ const AdminPage = () => {
   // Export state
   const [exportFrom, setExportFrom] = useState(format(subDays(new Date(), 30), "yyyy-MM-dd"));
   const [exportTo, setExportTo] = useState(format(new Date(), "yyyy-MM-dd"));
+
+  // Players tab
+  const [players, setPlayers] = useState<PlayerRow[]>([]);
+  const [playerSearch, setPlayerSearch] = useState("");
+
+  // Tournaments tab
+  const [tournaments, setTournaments] = useState<TournamentRow[]>([]);
+  const [tForm, setTForm] = useState({
+    name: "",
+    description: "",
+    format: "ladder",
+    start_date: format(new Date(), "yyyy-MM-dd"),
+    end_date: "",
+    max_participants: 32,
+  });
+  const [creatingT, setCreatingT] = useState(false);
+
+  // Add booking form
+  const [showAddBooking, setShowAddBooking] = useState(false);
+  const [nb, setNb] = useState({
+    court_number: 1,
+    slot_hour: 8,
+    customer_name: "",
+    customer_phone: "",
+    customer_email: "",
+    payment_status: "completed" as "pending" | "completed",
+  });
+  const [addingB, setAddingB] = useState(false);
+
 
   const dateStr = format(selectedDate, "yyyy-MM-dd");
 
@@ -49,7 +106,95 @@ const AdminPage = () => {
 
   useEffect(() => {
     if (authenticated && tab === "analytics") fetchAllBookings();
+    if (authenticated && tab === "players") fetchPlayers();
+    if (authenticated && tab === "tournaments") fetchTournaments();
   }, [authenticated, tab]);
+
+  async function fetchPlayers() {
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, username, display_name, phone, skill_level, gender, elo_rating, matches_played, created_at")
+      .order("created_at", { ascending: false });
+    setPlayers((data as PlayerRow[]) || []);
+  }
+
+  async function fetchTournaments() {
+    const { data: rows } = await supabase
+      .from("tournaments")
+      .select("*")
+      .order("start_date", { ascending: false });
+    if (!rows) { setTournaments([]); return; }
+    const withCounts = await Promise.all((rows as TournamentRow[]).map(async (t) => {
+      const { count } = await supabase
+        .from("tournament_participants")
+        .select("id", { count: "exact", head: true })
+        .eq("tournament_id", t.id);
+      return { ...t, participant_count: count || 0 };
+    }));
+    setTournaments(withCounts);
+  }
+
+  async function createTournament() {
+    if (!tForm.name || !tForm.start_date) { toast.error("Name and start date required"); return; }
+    setCreatingT(true);
+    const { error } = await supabase.from("tournaments").insert({
+      name: tForm.name,
+      description: tForm.description || "",
+      format: tForm.format,
+      start_date: tForm.start_date,
+      end_date: tForm.end_date || null,
+      max_participants: Number(tForm.max_participants) || 32,
+      status: "upcoming",
+    } as any);
+    setCreatingT(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Tournament created 🏆");
+    setTForm({ ...tForm, name: "", description: "", end_date: "" });
+    fetchTournaments();
+  }
+
+  async function updateTournamentStatus(id: string, status: string) {
+    const { error } = await supabase.from("tournaments").update({ status: status as any }).eq("id", id);
+    if (error) { toast.error("Failed"); return; }
+    toast.success("Status updated");
+    fetchTournaments();
+  }
+
+  async function deleteTournament(id: string) {
+    if (!confirm("Delete this tournament? Participants will be removed.")) return;
+    const { error } = await supabase.from("tournaments").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete"); return; }
+    toast.success("Tournament deleted");
+    fetchTournaments();
+  }
+
+  async function addBookingByAdmin() {
+    if (!nb.customer_name || !nb.customer_phone) { toast.error("Name and phone required"); return; }
+    setAddingB(true);
+    const amount = getSlotPrice(nb.slot_hour);
+    const { error } = await supabase.from("bookings").insert({
+      court_number: nb.court_number,
+      booking_date: dateStr,
+      slot_hour: nb.slot_hour,
+      customer_name: nb.customer_name,
+      customer_phone: nb.customer_phone,
+      customer_email: nb.customer_email || null,
+      amount,
+      payment_status: nb.payment_status,
+      payment_method: "upi_manual",
+      user_id: null,
+    } as any);
+    setAddingB(false);
+    if (error) {
+      toast.error(error.code === "23505" ? "Slot already booked" : error.message);
+      return;
+    }
+    toast.success("Booking added ✅");
+    setShowAddBooking(false);
+    setNb({ ...nb, customer_name: "", customer_phone: "", customer_email: "" });
+    fetchBookings();
+  }
+
 
   async function fetchBookings() {
     const { data } = await supabase
@@ -236,14 +381,21 @@ const AdminPage = () => {
           <h1 className="font-heading text-lg font-bold text-gradient-brand">📊 Admin Dashboard</h1>
           <Button variant="ghost" size="icon" onClick={() => setAuthenticated(false)}><LogOut className="h-4 w-4" /></Button>
         </div>
-        <div className="container flex gap-1 pb-2">
-          <Button variant={tab === "bookings" ? "default" : "ghost"} size="sm" onClick={() => setTab("bookings")} className="gap-1.5">
+        <div className="container flex gap-1 pb-2 overflow-x-auto">
+          <Button variant={tab === "bookings" ? "default" : "ghost"} size="sm" onClick={() => setTab("bookings")} className="gap-1.5 shrink-0">
             <LayoutGrid className="h-3.5 w-3.5" /> Bookings
           </Button>
-          <Button variant={tab === "analytics" ? "default" : "ghost"} size="sm" onClick={() => setTab("analytics")} className="gap-1.5">
+          <Button variant={tab === "players" ? "default" : "ghost"} size="sm" onClick={() => setTab("players")} className="gap-1.5 shrink-0">
+            <Users className="h-3.5 w-3.5" /> Players
+          </Button>
+          <Button variant={tab === "tournaments" ? "default" : "ghost"} size="sm" onClick={() => setTab("tournaments")} className="gap-1.5 shrink-0">
+            <Trophy className="h-3.5 w-3.5" /> Tournaments
+          </Button>
+          <Button variant={tab === "analytics" ? "default" : "ghost"} size="sm" onClick={() => setTab("analytics")} className="gap-1.5 shrink-0">
             <BarChart3 className="h-3.5 w-3.5" /> Analytics
           </Button>
         </div>
+
       </header>
 
       {tab === "bookings" && (
@@ -281,15 +433,53 @@ const AdminPage = () => {
             ))}
           </div>
 
-          {/* Search + view */}
-          <div className="flex gap-2">
-            <div className="relative flex-1">
+          {/* Search + view + add */}
+          <div className="flex gap-2 flex-wrap">
+            <div className="relative flex-1 min-w-[180px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Search name, phone, booking ID..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
             </div>
             <Button variant={view === "grid" ? "default" : "outline"} size="sm" onClick={() => setView("grid")}>Grid</Button>
             <Button variant={view === "list" ? "default" : "outline"} size="sm" onClick={() => setView("list")}>List</Button>
+            <Button size="sm" onClick={() => setShowAddBooking(v => !v)} className="gap-1"><Plus className="h-3.5 w-3.5" />Add</Button>
           </div>
+
+          {showAddBooking && (
+            <div className="bg-card border rounded-xl p-4 space-y-3 animate-fade-in">
+              <p className="font-semibold text-sm">➕ Add booking for {format(selectedDate, "dd MMM yyyy")}</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[10px] text-muted-foreground">Court</label>
+                  <Select value={String(nb.court_number)} onValueChange={v => setNb({ ...nb, court_number: Number(v) })}>
+                    <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>{COURTS.map(c => <SelectItem key={c} value={String(c)}>Court {c}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] text-muted-foreground">Slot</label>
+                  <Select value={String(nb.slot_hour)} onValueChange={v => setNb({ ...nb, slot_hour: Number(v) })}>
+                    <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>{SLOT_HOURS.map(h => <SelectItem key={h} value={String(h)}>{formatHour(h)} — ₹{getSlotPrice(h)}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Input placeholder="Customer name *" value={nb.customer_name} onChange={e => setNb({ ...nb, customer_name: e.target.value })} className="h-9 text-xs" />
+              <Input placeholder="Phone *" value={nb.customer_phone} onChange={e => setNb({ ...nb, customer_phone: e.target.value })} className="h-9 text-xs" />
+              <Input placeholder="Email (optional)" value={nb.customer_email} onChange={e => setNb({ ...nb, customer_email: e.target.value })} className="h-9 text-xs" />
+              <Select value={nb.payment_status} onValueChange={v => setNb({ ...nb, payment_status: v as any })}>
+                <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="completed">Paid / Confirmed</SelectItem>
+                  <SelectItem value="pending">Pending payment</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="flex gap-2">
+                <Button size="sm" className="flex-1" onClick={addBookingByAdmin} disabled={addingB}>{addingB ? "Saving..." : "Save booking"}</Button>
+                <Button size="sm" variant="outline" onClick={() => setShowAddBooking(false)}>Cancel</Button>
+              </div>
+            </div>
+          )}
+
 
           {view === "grid" && (
             <div className="space-y-1 overflow-x-auto">
@@ -362,7 +552,123 @@ const AdminPage = () => {
         </div>
       )}
 
+      {tab === "players" && (
+        <div className="container py-4 space-y-3 max-w-2xl mx-auto">
+          <div className="bg-card border rounded-xl p-3 flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" />
+            <p className="font-semibold text-sm">{players.length} registered players</p>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search username, name, phone..." value={playerSearch} onChange={e => setPlayerSearch(e.target.value)} className="pl-9" />
+          </div>
+          <div className="space-y-2">
+            {players
+              .filter(p => {
+                if (!playerSearch) return true;
+                const q = playerSearch.toLowerCase();
+                return p.username.toLowerCase().includes(q) ||
+                  p.display_name.toLowerCase().includes(q) ||
+                  (p.phone || "").includes(q);
+              })
+              .map(p => (
+                <div key={p.id} className="bg-card border rounded-xl p-3 space-y-1">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm truncate">{p.display_name}</p>
+                      <p className="text-xs text-muted-foreground">@{p.username}</p>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/10 text-accent shrink-0">{p.skill_level}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1 text-[11px] text-muted-foreground">
+                    <span>📞 {p.phone || "—"}</span>
+                    <span>👤 {p.gender || "—"}</span>
+                    <span>🎯 ELO {p.elo_rating}</span>
+                    <span>🏓 {p.matches_played} matches</span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">Joined {format(parseISO(p.created_at), "dd MMM yyyy")}</p>
+                </div>
+              ))}
+            {players.length === 0 && <p className="text-center text-muted-foreground text-sm py-8">No players yet</p>}
+          </div>
+        </div>
+      )}
+
+      {tab === "tournaments" && (
+        <div className="container py-4 space-y-4 max-w-2xl mx-auto">
+          <div className="bg-card border rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <Trophy className="h-4 w-4 text-primary" />
+              <p className="font-semibold text-sm">Create tournament</p>
+            </div>
+            <Input placeholder="Tournament name *" value={tForm.name} onChange={e => setTForm({ ...tForm, name: e.target.value })} className="h-9 text-xs" />
+            <Textarea placeholder="Description" value={tForm.description} onChange={e => setTForm({ ...tForm, description: e.target.value })} rows={2} className="text-xs" />
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <label className="text-[10px] text-muted-foreground">Format</label>
+                <Select value={tForm.format} onValueChange={v => setTForm({ ...tForm, format: v })}>
+                  <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ladder">Ladder</SelectItem>
+                    <SelectItem value="knockout">Knockout</SelectItem>
+                    <SelectItem value="round_robin">Round Robin</SelectItem>
+                    <SelectItem value="league">League</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] text-muted-foreground">Max players</label>
+                <Input type="number" min={2} value={tForm.max_participants} onChange={e => setTForm({ ...tForm, max_participants: Number(e.target.value) })} className="h-9 text-xs" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] text-muted-foreground">Start date *</label>
+                <Input type="date" value={tForm.start_date} onChange={e => setTForm({ ...tForm, start_date: e.target.value })} className="h-9 text-xs" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] text-muted-foreground">End date</label>
+                <Input type="date" value={tForm.end_date} onChange={e => setTForm({ ...tForm, end_date: e.target.value })} className="h-9 text-xs" />
+              </div>
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              Tip: reserve courts for the tournament by adding bookings in the Bookings tab (use the customer name "Tournament — {tForm.name || 'name'}") and collect payments manually.
+            </p>
+            <Button size="sm" onClick={createTournament} disabled={creatingT} className="w-full gap-1">
+              <Plus className="h-3.5 w-3.5" /> {creatingT ? "Creating..." : "Create tournament"}
+            </Button>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-muted-foreground">All tournaments ({tournaments.length})</p>
+            {tournaments.map(t => (
+              <div key={t.id} className="bg-card border rounded-xl p-3 space-y-2">
+                <div className="flex justify-between items-start gap-2">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm">{t.name}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {format(parseISO(t.start_date), "dd MMM yyyy")}
+                      {t.end_date && ` – ${format(parseISO(t.end_date), "dd MMM yyyy")}`}
+                      {" • "}{t.format} • {t.participant_count}/{t.max_participants || "∞"} joined
+                    </p>
+                  </div>
+                  <Button size="icon" variant="ghost" onClick={() => deleteTournament(t.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                </div>
+                {t.description && <p className="text-[11px] text-muted-foreground">{t.description}</p>}
+                <div className="flex gap-1 flex-wrap">
+                  {["upcoming", "active", "completed"].map(s => (
+                    <Button key={s} size="sm" variant={t.status === s ? "default" : "outline"} className="h-7 text-[10px]" onClick={() => updateTournamentStatus(t.id, s)}>
+                      {s}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            ))}
+            {tournaments.length === 0 && <p className="text-center text-muted-foreground text-sm py-6">No tournaments yet</p>}
+          </div>
+        </div>
+      )}
+
       {tab === "analytics" && (
+
         <div className="container py-4 space-y-5 max-w-3xl mx-auto">
           {/* Export */}
           <div className="bg-card border rounded-xl p-4 space-y-3">
