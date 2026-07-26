@@ -43,6 +43,7 @@ const AdminPage = () => {
   const [authenticated, setAuthenticated] = useState(false);
   const [pin, setPin] = useState("");
   const [tab, setTab] = useState<"bookings" | "players" | "tournaments" | "analytics">("bookings");
+  const [playersError, setPlayersError] = useState<string | null>(null);
 
 
   // Bookings tab state
@@ -113,11 +114,21 @@ const AdminPage = () => {
   }, [authenticated, tab]);
 
   async function fetchPlayers() {
-    const { data } = await supabase
-      .from("profiles")
-      .select("id, username, display_name, phone, skill_level, gender, elo_rating, matches_played, created_at")
-      .order("created_at", { ascending: false });
-    setPlayers((data as PlayerRow[]) || []);
+    setPlayersError(null);
+    const { data: sess } = await supabase.auth.getSession();
+    if (!sess.session) {
+      setPlayers([]);
+      setPlayersError("You need to sign in with your admin account (e.g. @krish or @anurag) to view player details. Log in from the home page, then come back here.");
+      return;
+    }
+    const { data, error } = await supabase.functions.invoke("admin-list-players", { body: {} });
+    if (error || (data as any)?.error) {
+      const msg = (data as any)?.error || error?.message || "Failed to load players";
+      setPlayers([]);
+      setPlayersError(msg.includes("Forbidden") || msg.includes("admin") ? "Your account doesn't have admin access. Sign in as @krish or @anurag." : msg);
+      return;
+    }
+    setPlayers(((data as any)?.players as PlayerRow[]) || []);
   }
 
   function genTempPassword() {
@@ -587,6 +598,12 @@ const AdminPage = () => {
             <Users className="h-4 w-4 text-primary" />
             <p className="font-semibold text-sm">{players.length} registered players</p>
           </div>
+          {playersError && (
+            <div className="bg-destructive/10 border border-destructive/30 text-destructive rounded-xl p-3 text-xs space-y-2">
+              <p>{playersError}</p>
+              <Link to="/login" className="inline-block underline font-semibold">Go to login →</Link>
+            </div>
+          )}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search username, name, phone..." value={playerSearch} onChange={e => setPlayerSearch(e.target.value)} className="pl-9" />
