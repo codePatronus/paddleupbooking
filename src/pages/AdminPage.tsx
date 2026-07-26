@@ -120,6 +120,33 @@ const AdminPage = () => {
     setPlayers((data as PlayerRow[]) || []);
   }
 
+  function genTempPassword() {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+    let s = "";
+    for (let i = 0; i < 10; i++) s += chars[Math.floor(Math.random() * chars.length)];
+    return s;
+  }
+
+  function openResetDialog(player: PlayerRow) {
+    setPwDialog({ open: true, player, newPw: genTempPassword(), loading: false, result: undefined });
+  }
+
+  async function submitResetPassword() {
+    if (!pwDialog.player) return;
+    if (pwDialog.newPw.length < 6) { toast.error("Password must be at least 6 characters"); return; }
+    setPwDialog(d => ({ ...d, loading: true }));
+    const { data, error } = await supabase.functions.invoke("admin-reset-password", {
+      body: { user_id: pwDialog.player.id, new_password: pwDialog.newPw },
+    });
+    if (error || (data as any)?.error) {
+      toast.error((data as any)?.error || error?.message || "Failed to reset password");
+      setPwDialog(d => ({ ...d, loading: false }));
+      return;
+    }
+    setPwDialog(d => ({ ...d, loading: false, result: d.newPw }));
+    toast.success("Password reset ✅ Share it with the player");
+  }
+
   async function fetchTournaments() {
     const { data: rows } = await supabase
       .from("tournaments")
