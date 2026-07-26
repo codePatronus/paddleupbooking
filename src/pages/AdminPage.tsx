@@ -615,13 +615,64 @@ const AdminPage = () => {
                     <span>🎯 ELO {p.elo_rating}</span>
                     <span>🏓 {p.matches_played} matches</span>
                   </div>
-                  <p className="text-[10px] text-muted-foreground">Joined {format(parseISO(p.created_at), "dd MMM yyyy")}</p>
+                  <div className="flex items-center justify-between pt-1">
+                    <p className="text-[10px] text-muted-foreground">Joined {format(parseISO(p.created_at), "dd MMM yyyy")}</p>
+                    <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1" onClick={() => openResetDialog(p)}>
+                      <KeyRound className="h-3 w-3" /> Reset password
+                    </Button>
+                  </div>
                 </div>
               ))}
             {players.length === 0 && <p className="text-center text-muted-foreground text-sm py-8">No players yet</p>}
           </div>
+
+          <Dialog open={pwDialog.open} onOpenChange={(o) => !o && setPwDialog({ open: false, newPw: "", loading: false })}>
+            <DialogContent className="max-w-sm">
+              <DialogHeader>
+                <DialogTitle>Reset password for @{pwDialog.player?.username}</DialogTitle>
+              </DialogHeader>
+              {!pwDialog.result ? (
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    Set a temporary password for <strong>{pwDialog.player?.display_name}</strong>. Share it with them privately — they can change it after logging in.
+                  </p>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium">New password (min 6 chars)</label>
+                    <div className="flex gap-2">
+                      <Input value={pwDialog.newPw} onChange={e => setPwDialog(d => ({ ...d, newPw: e.target.value }))} className="font-mono" />
+                      <Button type="button" variant="outline" size="sm" onClick={() => setPwDialog(d => ({ ...d, newPw: genTempPassword() }))}>
+                        Random
+                      </Button>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="ghost" size="sm" onClick={() => setPwDialog({ open: false, newPw: "", loading: false })}>Cancel</Button>
+                    <Button size="sm" onClick={submitResetPassword} disabled={pwDialog.loading}>
+                      {pwDialog.loading ? "Resetting..." : "Reset password"}
+                    </Button>
+                  </DialogFooter>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    ✅ Password reset. Copy and share it with the player now — you won't be able to see it again.
+                  </p>
+                  <div className="bg-muted rounded-lg p-3 font-mono text-sm flex items-center justify-between gap-2">
+                    <span className="break-all">{pwDialog.result}</span>
+                    <Button size="icon" variant="ghost" onClick={() => { navigator.clipboard.writeText(pwDialog.result!); toast.success("Copied"); }}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <DialogFooter>
+                    <Button size="sm" onClick={() => setPwDialog({ open: false, newPw: "", loading: false })}>Done</Button>
+                  </DialogFooter>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
       )}
+
 
       {tab === "tournaments" && (
         <div className="container py-4 space-y-4 max-w-2xl mx-auto">
