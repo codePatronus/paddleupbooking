@@ -64,6 +64,7 @@ const AdminPage = () => {
   // Players tab
   const [players, setPlayers] = useState<PlayerRow[]>([]);
   const [playerSearch, setPlayerSearch] = useState("");
+  const [pwDialog, setPwDialog] = useState<{ open: boolean; player?: PlayerRow; newPw: string; result?: string; loading: boolean }>({ open: false, newPw: "", loading: false });
 
   // Tournaments tab
   const [tournaments, setTournaments] = useState<TournamentRow[]>([]);
