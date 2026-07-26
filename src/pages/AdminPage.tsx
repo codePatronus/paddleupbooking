@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, LogOut, Search, Download, BarChart3, LayoutGrid, Users, Trophy, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, Search, Download, BarChart3, LayoutGrid, Users, Trophy, Plus, Trash2, KeyRound, Copy } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -63,6 +64,7 @@ const AdminPage = () => {
   // Players tab
   const [players, setPlayers] = useState<PlayerRow[]>([]);
   const [playerSearch, setPlayerSearch] = useState("");
+  const [pwDialog, setPwDialog] = useState<{ open: boolean; player?: PlayerRow; newPw: string; result?: string; loading: boolean }>({ open: false, newPw: "", loading: false });
 
   // Tournaments tab
   const [tournaments, setTournaments] = useState<TournamentRow[]>([]);
@@ -116,6 +118,33 @@ const AdminPage = () => {
       .select("id, username, display_name, phone, skill_level, gender, elo_rating, matches_played, created_at")
       .order("created_at", { ascending: false });
     setPlayers((data as PlayerRow[]) || []);
+  }
+
+  function genTempPassword() {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+    let s = "";
+    for (let i = 0; i < 10; i++) s += chars[Math.floor(Math.random() * chars.length)];
+    return s;
+  }
+
+  function openResetDialog(player: PlayerRow) {
+    setPwDialog({ open: true, player, newPw: genTempPassword(), loading: false, result: undefined });
+  }
+
+  async function submitResetPassword() {
+    if (!pwDialog.player) return;
+    if (pwDialog.newPw.length < 6) { toast.error("Password must be at least 6 characters"); return; }
+    setPwDialog(d => ({ ...d, loading: true }));
+    const { data, error } = await supabase.functions.invoke("admin-reset-password", {
+      body: { user_id: pwDialog.player.id, new_password: pwDialog.newPw },
+    });
+    if (error || (data as any)?.error) {
+      toast.error((data as any)?.error || error?.message || "Failed to reset password");
+      setPwDialog(d => ({ ...d, loading: false }));
+      return;
+    }
+    setPwDialog(d => ({ ...d, loading: false, result: d.newPw }));
+    toast.success("Password reset ✅ Share it with the player");
   }
 
   async function fetchTournaments() {
@@ -586,13 +615,64 @@ const AdminPage = () => {
                     <span>🎯 ELO {p.elo_rating}</span>
                     <span>🏓 {p.matches_played} matches</span>
                   </div>
-                  <p className="text-[10px] text-muted-foreground">Joined {format(parseISO(p.created_at), "dd MMM yyyy")}</p>
+                  <div className="flex items-center justify-between pt-1">
+                    <p className="text-[10px] text-muted-foreground">Joined {format(parseISO(p.created_at), "dd MMM yyyy")}</p>
+                    <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1" onClick={() => openResetDialog(p)}>
+                      <KeyRound className="h-3 w-3" /> Reset password
+                    </Button>
+                  </div>
                 </div>
               ))}
             {players.length === 0 && <p className="text-center text-muted-foreground text-sm py-8">No players yet</p>}
           </div>
+
+          <Dialog open={pwDialog.open} onOpenChange={(o) => !o && setPwDialog({ open: false, newPw: "", loading: false })}>
+            <DialogContent className="max-w-sm">
+              <DialogHeader>
+                <DialogTitle>Reset password for @{pwDialog.player?.username}</DialogTitle>
+              </DialogHeader>
+              {!pwDialog.result ? (
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    Set a temporary password for <strong>{pwDialog.player?.display_name}</strong>. Share it with them privately — they can change it after logging in.
+                  </p>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium">New password (min 6 chars)</label>
+                    <div className="flex gap-2">
+                      <Input value={pwDialog.newPw} onChange={e => setPwDialog(d => ({ ...d, newPw: e.target.value }))} className="font-mono" />
+                      <Button type="button" variant="outline" size="sm" onClick={() => setPwDialog(d => ({ ...d, newPw: genTempPassword() }))}>
+                        Random
+                      </Button>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="ghost" size="sm" onClick={() => setPwDialog({ open: false, newPw: "", loading: false })}>Cancel</Button>
+                    <Button size="sm" onClick={submitResetPassword} disabled={pwDialog.loading}>
+                      {pwDialog.loading ? "Resetting..." : "Reset password"}
+                    </Button>
+                  </DialogFooter>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    ✅ Password reset. Copy and share it with the player now — you won't be able to see it again.
+                  </p>
+                  <div className="bg-muted rounded-lg p-3 font-mono text-sm flex items-center justify-between gap-2">
+                    <span className="break-all">{pwDialog.result}</span>
+                    <Button size="icon" variant="ghost" onClick={() => { navigator.clipboard.writeText(pwDialog.result!); toast.success("Copied"); }}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <DialogFooter>
+                    <Button size="sm" onClick={() => setPwDialog({ open: false, newPw: "", loading: false })}>Done</Button>
+                  </DialogFooter>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
       )}
+
 
       {tab === "tournaments" && (
         <div className="container py-4 space-y-4 max-w-2xl mx-auto">
