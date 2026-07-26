@@ -598,6 +598,12 @@ const AdminPage = () => {
             <Users className="h-4 w-4 text-primary" />
             <p className="font-semibold text-sm">{players.length} registered players</p>
           </div>
+          {playersError && (
+            <div className="bg-destructive/10 border border-destructive/30 text-destructive rounded-xl p-3 text-xs space-y-2">
+              <p>{playersError}</p>
+              <Link to="/login" className="inline-block underline font-semibold">Go to login →</Link>
+            </div>
+          )}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search username, name, phone..." value={playerSearch} onChange={e => setPlayerSearch(e.target.value)} className="pl-9" />
