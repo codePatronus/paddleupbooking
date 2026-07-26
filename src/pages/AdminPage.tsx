@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, LogOut, Search, Download, BarChart3, LayoutGrid, Users, Trophy, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, Search, Download, BarChart3, LayoutGrid, Users, Trophy, Plus, Trash2, KeyRound, Copy } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
