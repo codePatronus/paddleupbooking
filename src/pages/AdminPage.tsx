@@ -350,6 +350,9 @@ const AdminPage = () => {
   }
 
   // ===== ANALYTICS COMPUTATIONS =====
+  const ALLOWED_HOURS = [8, 9, 16, 17, 18, 19, 20, 21];
+  const DOW_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
   const analytics = useMemo(() => {
     let from: Date, to: Date;
     const now = new Date();
@@ -374,11 +377,36 @@ const AdminPage = () => {
       };
     });
 
-    // Peak hours
+    // Peak hours (filter: only allowed hours — no midday 10 AM–3 PM slots)
     const hourCounts: Record<number, number> = {};
-    SLOT_HOURS.forEach(h => { hourCounts[h] = 0; });
-    completed.forEach(b => { hourCounts[b.slot_hour] = (hourCounts[b.slot_hour] || 0) + 1; });
-    const peakHours = SLOT_HOURS.map(h => ({ hour: formatHour(h), count: hourCounts[h] || 0 }));
+    ALLOWED_HOURS.forEach(h => { hourCounts[h] = 0; });
+    completed.forEach(b => {
+      if (ALLOWED_HOURS.includes(b.slot_hour)) {
+        hourCounts[b.slot_hour] = (hourCounts[b.slot_hour] || 0) + 1;
+      }
+    });
+    const peakHours = ALLOWED_HOURS.map(h => ({
+      hour: formatHour(h),
+      hourNum: h,
+      count: hourCounts[h] || 0,
+    }));
+
+    // Day-of-week aggregates
+    const dowAgg = DOW_LABELS.map(name => ({ name, bookings: 0, revenue: 0, days: 0 }));
+    const dowDaySeen: Record<number, Set<string>> = { 0:new Set(),1:new Set(),2:new Set(),3:new Set(),4:new Set(),5:new Set(),6:new Set() };
+    days.forEach(d => { dowDaySeen[d.getDay()].add(format(d, "yyyy-MM-dd")); });
+    completed.forEach(b => {
+      const d = parseISO(b.booking_date).getDay();
+      dowAgg[d].bookings += 1;
+      dowAgg[d].revenue += b.amount;
+    });
+    DOW_LABELS.forEach((_, i) => { dowAgg[i].days = dowDaySeen[i].size || 1; });
+    const dayOfWeek = dowAgg.map(x => ({
+      name: x.name,
+      bookings: x.bookings,
+      avg: +(x.bookings / x.days).toFixed(1),
+      revenue: x.revenue,
+    }));
 
     // Frequent customers
     const custMap: Record<string, { name: string; phone: string; count: number; revenue: number }> = {};
@@ -395,7 +423,25 @@ const AdminPage = () => {
     const totalRev = completed.reduce((s, b) => s + b.amount, 0);
     const avgPerDay = completed.length / dayCount;
 
-    return { trend, peakHours, frequentCustomers, totalRev, totalCount: completed.length, avgPerDay, dayCount };
+    // Insights
+    const busiestDay = [...dayOfWeek].sort((a, b) => b.avg - a.avg)[0];
+    const quietestDay = [...dayOfWeek].filter(d => d.bookings > 0).sort((a, b) => a.avg - b.avg)[0];
+    const peakHour = [...peakHours].sort((a, b) => b.count - a.count)[0];
+    const topRevDay = [...trend].sort((a, b) => b.revenue - a.revenue)[0];
+    const totalCapacity = dayCount * 3 * ALLOWED_HOURS.length;
+    const occupancy = totalCapacity > 0 ? (completed.length / totalCapacity) * 100 : 0;
+    const eveningCount = completed.filter(b => b.slot_hour >= 17).length;
+    const eveningShare = completed.length > 0 ? (eveningCount / completed.length) * 100 : 0;
+
+    const insights = {
+      busiestDay, quietestDay, peakHour, topRevDay,
+      occupancy: +occupancy.toFixed(1),
+      eveningShare: +eveningShare.toFixed(0),
+      avgRevPerDay: Math.round(totalRev / dayCount),
+      avgTicket: completed.length > 0 ? Math.round(totalRev / completed.length) : 0,
+    };
+
+    return { trend, peakHours, dayOfWeek, frequentCustomers, totalRev, totalCount: completed.length, avgPerDay, dayCount, insights };
   }, [allBookings, analyticsRange, customFrom, customTo]);
 
   if (!authenticated) {
