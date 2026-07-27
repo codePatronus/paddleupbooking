@@ -350,6 +350,9 @@ const AdminPage = () => {
   }
 
   // ===== ANALYTICS COMPUTATIONS =====
+  const ALLOWED_HOURS = [8, 9, 16, 17, 18, 19, 20, 21];
+  const DOW_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
   const analytics = useMemo(() => {
     let from: Date, to: Date;
     const now = new Date();
@@ -374,11 +377,36 @@ const AdminPage = () => {
       };
     });
 
-    // Peak hours
+    // Peak hours (filter: only allowed hours — no midday 10 AM–3 PM slots)
     const hourCounts: Record<number, number> = {};
-    SLOT_HOURS.forEach(h => { hourCounts[h] = 0; });
-    completed.forEach(b => { hourCounts[b.slot_hour] = (hourCounts[b.slot_hour] || 0) + 1; });
-    const peakHours = SLOT_HOURS.map(h => ({ hour: formatHour(h), count: hourCounts[h] || 0 }));
+    ALLOWED_HOURS.forEach(h => { hourCounts[h] = 0; });
+    completed.forEach(b => {
+      if (ALLOWED_HOURS.includes(b.slot_hour)) {
+        hourCounts[b.slot_hour] = (hourCounts[b.slot_hour] || 0) + 1;
+      }
+    });
+    const peakHours = ALLOWED_HOURS.map(h => ({
+      hour: formatHour(h),
+      hourNum: h,
+      count: hourCounts[h] || 0,
+    }));
+
+    // Day-of-week aggregates
+    const dowAgg = DOW_LABELS.map(name => ({ name, bookings: 0, revenue: 0, days: 0 }));
+    const dowDaySeen: Record<number, Set<string>> = { 0:new Set(),1:new Set(),2:new Set(),3:new Set(),4:new Set(),5:new Set(),6:new Set() };
+    days.forEach(d => { dowDaySeen[d.getDay()].add(format(d, "yyyy-MM-dd")); });
+    completed.forEach(b => {
+      const d = parseISO(b.booking_date).getDay();
+      dowAgg[d].bookings += 1;
+      dowAgg[d].revenue += b.amount;
+    });
+    DOW_LABELS.forEach((_, i) => { dowAgg[i].days = dowDaySeen[i].size || 1; });
+    const dayOfWeek = dowAgg.map(x => ({
+      name: x.name,
+      bookings: x.bookings,
+      avg: +(x.bookings / x.days).toFixed(1),
+      revenue: x.revenue,
+    }));
 
     // Frequent customers
     const custMap: Record<string, { name: string; phone: string; count: number; revenue: number }> = {};
@@ -395,7 +423,25 @@ const AdminPage = () => {
     const totalRev = completed.reduce((s, b) => s + b.amount, 0);
     const avgPerDay = completed.length / dayCount;
 
-    return { trend, peakHours, frequentCustomers, totalRev, totalCount: completed.length, avgPerDay, dayCount };
+    // Insights
+    const busiestDay = [...dayOfWeek].sort((a, b) => b.avg - a.avg)[0];
+    const quietestDay = [...dayOfWeek].filter(d => d.bookings > 0).sort((a, b) => a.avg - b.avg)[0];
+    const peakHour = [...peakHours].sort((a, b) => b.count - a.count)[0];
+    const topRevDay = [...trend].sort((a, b) => b.revenue - a.revenue)[0];
+    const totalCapacity = dayCount * 3 * ALLOWED_HOURS.length;
+    const occupancy = totalCapacity > 0 ? (completed.length / totalCapacity) * 100 : 0;
+    const eveningCount = completed.filter(b => b.slot_hour >= 17).length;
+    const eveningShare = completed.length > 0 ? (eveningCount / completed.length) * 100 : 0;
+
+    const insights = {
+      busiestDay, quietestDay, peakHour, topRevDay,
+      occupancy: +occupancy.toFixed(1),
+      eveningShare: +eveningShare.toFixed(0),
+      avgRevPerDay: Math.round(totalRev / dayCount),
+      avgTicket: completed.length > 0 ? Math.round(totalRev / completed.length) : 0,
+    };
+
+    return { trend, peakHours, dayOfWeek, frequentCustomers, totalRev, totalCount: completed.length, avgPerDay, dayCount, insights };
   }, [allBookings, analyticsRange, customFrom, customTo]);
 
   if (!authenticated) {
@@ -843,9 +889,25 @@ const AdminPage = () => {
             </ResponsiveContainer>
           </div>
 
+          {/* Bookings by day of week */}
+          <div className="bg-card border rounded-xl p-4">
+            <p className="font-semibold text-sm mb-1">📆 Bookings by Day of Week</p>
+            <p className="text-[10px] text-muted-foreground mb-3">Average bookings per weekday over the selected range</p>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={analytics.dayOfWeek}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                <Tooltip formatter={(v: number, k: string) => k === "avg" ? [`${v} / day`, "Avg bookings"] : [v, k]} />
+                <Bar dataKey="avg" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
           {/* Peak hours */}
           <div className="bg-card border rounded-xl p-4">
-            <p className="font-semibold text-sm mb-3">⏰ Peak Hours</p>
+            <p className="font-semibold text-sm mb-1">⏰ Peak Hours</p>
+            <p className="text-[10px] text-muted-foreground mb-3">Morning (8–9 AM) and evening (4–9 PM) slots only. Midday 10 AM–4 PM is closed.</p>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={analytics.peakHours}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
@@ -855,6 +917,45 @@ const AdminPage = () => {
                 <Bar dataKey="count" fill="hsl(var(--peak))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+
+          {/* Insights */}
+          <div className="bg-card border rounded-xl p-4">
+            <p className="font-semibold text-sm mb-3">💡 Insights</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <div className="rounded-lg border p-3">
+                <p className="text-[10px] text-muted-foreground">Busiest weekday</p>
+                <p className="font-semibold text-primary">{analytics.insights.busiestDay?.name || "—"} · {analytics.insights.busiestDay?.avg || 0} bookings/day avg</p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-[10px] text-muted-foreground">Quietest weekday</p>
+                <p className="font-semibold text-offpeak">{analytics.insights.quietestDay?.name || "—"} · {analytics.insights.quietestDay?.avg || 0} bookings/day avg</p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-[10px] text-muted-foreground">Peak slot</p>
+                <p className="font-semibold text-peak">{analytics.insights.peakHour?.hour || "—"} · {analytics.insights.peakHour?.count || 0} bookings</p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-[10px] text-muted-foreground">Top revenue day</p>
+                <p className="font-semibold text-primary">{analytics.insights.topRevDay?.date || "—"} · ₹{analytics.insights.topRevDay?.revenue || 0}</p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-[10px] text-muted-foreground">Court occupancy</p>
+                <p className="font-semibold">{analytics.insights.occupancy}% <span className="text-[10px] text-muted-foreground font-normal">of available slots</span></p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-[10px] text-muted-foreground">Evening share (5 PM+)</p>
+                <p className="font-semibold">{analytics.insights.eveningShare}% <span className="text-[10px] text-muted-foreground font-normal">of all bookings</span></p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-[10px] text-muted-foreground">Avg revenue / day</p>
+                <p className="font-semibold text-primary">₹{analytics.insights.avgRevPerDay}</p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-[10px] text-muted-foreground">Avg ticket size</p>
+                <p className="font-semibold">₹{analytics.insights.avgTicket}</p>
+              </div>
+            </div>
           </div>
 
           {/* Frequent customers */}
