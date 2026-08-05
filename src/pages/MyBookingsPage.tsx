@@ -82,7 +82,9 @@ const MyBookingsPage = () => {
         <div className="container flex items-center h-14 gap-3">
           <BackButton />
           <h1 className="font-heading text-lg font-bold text-gradient-brand">My Bookings</h1>
+          <div className="ml-auto"><NotificationBell /></div>
         </div>
+
       </header>
 
       <div className="container py-4 max-w-lg mx-auto space-y-3">
