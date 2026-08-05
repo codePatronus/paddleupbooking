@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { BackButton } from "@/components/BackButton";
+import { NotificationBell } from "@/components/NotificationBell";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
