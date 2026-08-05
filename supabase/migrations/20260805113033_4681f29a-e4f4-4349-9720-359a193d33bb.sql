@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Authenticated can read non-sensitive profile fields" ON public.profiles;
