@@ -4,7 +4,7 @@
 
 # Paddle Up Manipal
 
-Paddle Up Manipal is a court booking and community platform for a pickleball facility in Manipal. It lets players book courts, find people to play with, join tournaments, chat with the community, and track their standing on a leaderboard. It also has an admin dashboard for managing bookings, players, and courts.
+[@Paddle Up Manipal](https://paddleupbooking.lovable.app) is a court booking and community platform for a pickleball facility in Manipal. It lets players book courts, find people to play with, join tournaments, chat with the community, and track their standing on a leaderboard. It also has an admin dashboard for managing bookings, players, and courts.
 
 ## What it does
 
