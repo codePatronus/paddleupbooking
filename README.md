@@ -1,73 +1,104 @@
-# Welcome to your Lovable project
+# Paddle Up Manipal
 
-## Project info
+Paddle Up Manipal is a court booking and community platform for a pickleball facility in Manipal. It lets players book courts, find people to play with, join tournaments, chat with the community, and track their standing on a leaderboard. It also has an admin dashboard for managing bookings, players, and courts.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## What it does
 
-## How can I edit this code?
+- **Court booking**: Book one of 3 courts across time slots from 8 AM to 9 PM, with peak hour pricing after 4 PM.
+- **Player matching**: While booking, mark that you need players and set a skill level, gender preference, and play mode (casual or competitive) so others can join your slot.
+- **Payments**: Checkout is handled through Paddle, with a UPI/QR code option for local payments and a test mode banner for staging.
+- **Find players**: Browse and connect with other players looking for a game.
+- **Community chat**: A shared chat room for the player community.
+- **Tournaments**: View and join tournaments run by the facility.
+- **Leaderboard**: See player rankings based on activity and results.
+- **Player profiles**: Each player has a public profile page and can set up their profile after signup.
+- **Notifications**: In-app notification bell for booking updates and matches.
+- **My Bookings**: Players can view and manage their own upcoming and past bookings.
+- **Admin dashboard**: Manage bookings, add bookings manually, reset player passwords, view revenue charts, export bookings, and manage tournaments.
 
-There are several ways of editing your application.
+## Tech stack
 
-**Use Lovable**
+- **Frontend**: React 18, TypeScript, Vite
+- **UI**: shadcn/ui, Radix UI, Tailwind CSS
+- **Backend**: Supabase (Postgres, Auth, Edge Functions, Realtime)
+- **Payments**: Paddle (checkout, webhooks, price lookup)
+- **Other**: React Router, React Query, React Hook Form, Zod, Recharts, qrcode.react, jsPDF, xlsx
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+This project was originally scaffolded with Lovable, so you'll also see a `lovable-tagger` dev dependency and some Lovable-related config left in place.
 
-Changes made via Lovable will be committed automatically to this repo.
+## Project structure
 
-**Use your preferred IDE**
+```
+src/
+  pages/           # Route-level pages (Booking, Admin, Community, Leaderboard, etc.)
+  components/      # Shared components and shadcn/ui primitives
+  contexts/        # React context providers (e.g. auth)
+  hooks/           # Custom hooks
+  integrations/    # Supabase and Paddle client setup
+  lib/             # Shared config and helper functions
+supabase/
+  functions/       # Edge functions (admin actions, Paddle webhook, price lookup)
+  migrations/      # Database schema and migrations
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Getting started
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
 
-Follow these steps:
+- Node.js (use [nvm](https://github.com/nvm-sh/nvm) to manage versions if you don't already have Node installed)
+- A Supabase project
+- A Paddle account for payments (sandbox is fine for local development)
+
+### Setup
+
+1. Clone the repository
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+git clone https://github.com/codePatronus/paddleupbooking.git
+cd paddleupbooking
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. Install dependencies
 
-# Step 3: Install the necessary dependencies.
-npm i
+```sh
+npm install
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Set up environment variables
+
+Create a `.env` file in the project root with your Supabase and Paddle credentials. Check `src/integrations` and `supabase/functions` for the exact variable names your setup expects, such as the Supabase URL and anon key, and the Paddle client token and price IDs.
+
+4. Set up the database
+
+Run the SQL migrations in `supabase/migrations` against your Supabase project, either through the Supabase CLI or the SQL editor in the dashboard, in order by filename.
+
+5. Start the dev server
+
+```sh
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app will be available at `http://localhost:5173` by default.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Other useful scripts
 
-**Use GitHub Codespaces**
+```sh
+npm run build       # Production build
+npm run build:dev   # Development-mode build
+npm run preview     # Preview a production build locally
+npm run lint         # Run ESLint
+npm run test         # Run tests once with Vitest
+npm run test:watch  # Run tests in watch mode
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Deployment
 
-## What technologies are used for this project?
+The app is a standard Vite/React build, so it can be deployed to any static host. A `vercel.json` is included for deploying to Vercel. Make sure your environment variables are set on whichever platform you deploy to, and that your Supabase edge functions, including the Paddle webhook, are deployed separately through Supabase.
 
-This project is built with:
+## Contributing
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Issues and pull requests are welcome. If you're adding a feature that touches bookings, payments, or admin actions, please test it against a Supabase sandbox and a Paddle sandbox environment before opening a PR.
 
-## How can I deploy this project?
+## License
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+No license has been specified for this project yet. Contact the repository owner if you want to use this code outside of personal or internal use.
